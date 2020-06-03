@@ -35,7 +35,9 @@ export default function userReducer(state = initialState(), action) {
       ls.remove('user')
       state = initialState();
       return state
-
+    case 'SET_INITIAL_STATE':
+      state = initialState();
+      return state
     default:
       return state
   }

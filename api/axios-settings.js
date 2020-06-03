@@ -4,7 +4,8 @@ import Swal from 'sweetalert2/dist/sweetalert2.js'
 import Router from 'next/router'
 
 
-axios.custom_base_url = "http://spts.test/";
+axios.defaults.baseURL = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
+
 if(ls('user')){
   let token = ls('user').access_token;
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -22,7 +23,6 @@ if(ls('user')){
           Router.push('/')
         }
       })
-      return false;
     }else if (error.response && error.response.status == 403) {
       Swal.fire({
         title: 'Forbidden',
@@ -33,7 +33,6 @@ if(ls('user')){
           Router.push('/')
         }
       })
-      return false;
     }else if (error.response && error.response.status >= 500) {
       Swal.fire({
         title: 'Oops...',
@@ -41,15 +40,13 @@ if(ls('user')){
         icon: 'error',
         confirmButtonText: 'Ok',
       })
-      return false;
-    }else if (!error.response) {
+    }else if (!error.status) {
       Swal.fire({
         title: 'Oops...',
         text: 'Check your internet connection',
         icon: 'error',
         confirmButtonText: 'Ok',
       })
-      return false;
     }
     return Promise.reject(error);
   });

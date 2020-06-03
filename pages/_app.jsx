@@ -1,5 +1,5 @@
 // import App from 'next/app'
-import '../styles.css'
+import '../resources/css/styles.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'antd/dist/antd.css';
 import 'nprogress/nprogress.css';

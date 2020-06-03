@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Provider } from 'react-redux'
 import store from '../store'
 import Layouts from './../layouts/layouts'
-import BeneficiaryForm from '../components/Beneficiary/BeneficiaryForm'
+import HheadForm from '../components/Hhead/HheadForm'
 
 export class index extends Component {
   constructor(props){
@@ -20,7 +20,7 @@ export class index extends Component {
           <title>Dashboard</title>
         </Head>
         <Layouts>
-          <BeneficiaryForm />
+          <HheadForm />
         </Layouts>
       </Provider>
     );

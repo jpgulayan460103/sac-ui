@@ -1,11 +1,11 @@
 {
-  "name": "spts-ui",
+  "name": "brgy-ui",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "SET NODE_ENV=development & next dev",
+    "build": "SET NODE_ENV=production & next build",
+    "start": "SET NODE_ENV=production & next start",
     "export": "next export"
   },
   "dependencies": {
@@ -14,12 +14,11 @@
     "@fortawesome/free-brands-svg-icons": "^5.12.1",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/react-fontawesome": "^0.1.9",
-    "@zeit/next-less": "^1.0.1",
     "antd": "^4.0.2",
     "autoprefixer": "^9.7.4",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
-    "less": "^3.11.1",
+    "dotenv": "^8.2.0",
     "local-storage": "^2.0.0",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
@@ -31,8 +30,6 @@
     "query-string": "^6.11.1",
     "react": "16.13.0",
     "react-dom": "16.13.0",
-    "react-highlight-words": "^0.16.0",
-    "react-pluralize": "^1.6.3",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
     "reactstrap": "^8.4.1",

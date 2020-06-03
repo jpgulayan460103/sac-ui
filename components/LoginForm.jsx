@@ -46,22 +46,23 @@ class LoginForm extends Component {
       .then(res => {})
   }
   onFinish = values => {
+    // console.log('Success:', values);
     API.User.login(values)
     .then(res => {
       this.props.dispatch({
         type: "USER_LOGIN_SUCCESSFUL",
         data: res.data
       });
+      console.log(res.data);
+      
       Router.push('/')
     })
     .catch(err => {
-      if(err.response && err.response.data){
-        this.props.dispatch({
-          type: "USER_LOGIN_FAILED",
-          data: err
-        });
-        Router.push('/login')
-      }
+      this.props.dispatch({
+        type: "USER_LOGIN_FAILED",
+        data: err
+      });
+      Router.push('/login')
     })
     .then(res => {})
   }
@@ -71,6 +72,7 @@ class LoginForm extends Component {
   render() {
     return (
       <div className="pt-16">
+        <img src="/images/logo.png" className="h-40 w-40 rounded-full mx-auto" alt=""/>
         <Form
           {...layout}
           name="basic"
