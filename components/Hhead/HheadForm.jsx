@@ -1,7 +1,7 @@
 import React, { useState,useEffect} from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router'
-import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber  } from 'antd';
+import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber, Badge  } from 'antd';
 import { ArrowLeftOutlined, SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import API from '../../api'
 import _forEach from 'lodash/forEach'
@@ -39,6 +39,7 @@ const HheadForm = (props) => {
 
   const [formData, setFormData] = useState({});
   const [submit, setSubmit] = useState(false);
+  const [membersCount, setMembersCount] = useState(1);
   const formRef = React.useRef();
   useEffect(() => {
     formRef.current.setFieldsValue({
@@ -63,14 +64,30 @@ const HheadForm = (props) => {
       }
       if(key == "kapanganakan" || key == "petsa_ng_pagrehistro"){
         transformedValue[key] = moment.parseZone(value).utc();
+        if(key == "kapanganakan"){
+          let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
+          transformedValue['age'] = age;
+          if(age < 0){
+            transformedValue[key] = moment().utc();
+            transformedValue['age'] = 0;
+          }else if((age<8 || age>55) && (props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina")){
+            transformedValue['sektor'] = "";
+          }else if(age<60 && props.formData.sektor == "A - Nakatatanda"){
+            transformedValue['sektor'] = "";
+          }
+        }
       }
-        if(key == "katutubo" &&  !value){
-          transformedValue['katutubo_name']  = "";
+      if(key == "katutubo" &&  !value){
+        transformedValue['katutubo_name']  = "";
+      }
+      if(key == "bene_others" &&  !value){
+        transformedValue['others_name']  = "";
+      }
+      if(key == "kasarian" && value == "M" ){
+        if(props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina"){
+          transformedValue['sektor']  = "";
         }
-        if(key == "bene_others" &&  !value){
-          transformedValue['others_name']  = "";
-        }
-
+      }
     });
     let formData  = props.formData;
     props.dispatch({
@@ -92,6 +109,81 @@ const HheadForm = (props) => {
         help: props.formError[field][0]
       }
     }
+  }
+
+  const getAge = (dateString) => {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+  }
+
+  const addMember = () => {
+    setMembersCount(membersCount + 1);
+    let members = props.members;
+    members[membersCount] = {};
+    props.dispatch({
+      type: "ADD_HMEMBERS",
+      data: {
+        ...props.members,
+        ...members
+      }
+    }) 
+  }
+  const removeLastMember = () => {
+    if(membersCount > 0){
+      setMembersCount(membersCount - 1);
+      let membersObjectCount = Object.keys(props.members).length;
+      
+      let members = props.members;
+      delete members[membersObjectCount-1];
+      // members[membersObjectCount] = {};
+      props.dispatch({
+        type: "ADD_HMEMBERS",
+        data: {
+          ...props.members,
+          ...members
+        }
+      }) 
+    }
+  }
+
+  const populateMembers = () => {
+    let items = [];
+    for (let index = 0; index < membersCount; index++) {
+      items.push(<HmemberForm memberIndex={index} />);    
+    }
+    if(membersCount == 0){
+      return (
+        <Input.Group compact>
+          <Form.Item  style={{ width: '10%' }} label="Last Name">
+          </Form.Item>
+          <Form.Item  style={{ width: '10%' }} label="First Name">
+          </Form.Item>
+          <Form.Item  style={{ width: '10%' }} label="Middle Name">
+          </Form.Item>
+          <Form.Item  style={{ width: '5%' }} label="Ext">
+          </Form.Item>
+          <Form.Item  style={{ width: '15%' }} label="Relasyon">
+          </Form.Item>
+          <Form.Item  style={{ width: '15%' }} label="Kapanganakan">
+          </Form.Item>
+          <Form.Item  style={{ width: '5%' }} label="Kasarian">
+          </Form.Item>
+          <Form.Item  style={{ width: '15%' }} label="Trabaho">
+          </Form.Item>
+          <Form.Item  style={{ width: '9.5%' }} label="Sektor">
+          </Form.Item>
+          <Form.Item  style={{ width: '5%' }} label="Kondisyon ng Kalusugan">
+          </Form.Item>
+        </Input.Group>
+      )
+    }
+    return items;
   }
 
   return (
@@ -174,9 +266,9 @@ const HheadForm = (props) => {
             <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}}>
               <option value="">Sektor</option>
               <option value="W - Wala sa pagpipilian">W - Wala sa pagpipilian</option>
-              <option value="A - Nakatatanda">A - Nakatatanda</option>
-              <option value="B - Buntis">B - Buntis</option>
-              <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>
+              { (props.formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
+              { (props.formData.kasarian == "M" || props.formData.age < 8 || props.formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>}
+              { (props.formData.kasarian == "M" || props.formData.age < 8 || props.formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>}
               <option value="D - PWD">D - PWD</option>
               <option value="E - Solo Parent">E - Solo Parent</option>
               <option value="F - Walang Tirahan">F - Walang Tirahan</option>
@@ -206,7 +298,7 @@ const HheadForm = (props) => {
             <Checkbox>Katutubo (Grupo)</Checkbox>
           </Form.Item>
           <Form.Item style={{ width: '16.5%' }} label="" name="katutubo_name" valuePropName="checked">
-            <Select placeholder="Katutubo Name" showSearch optionFilterProp="children" style={{ width: '100%' }} filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+            <Select placeholder="Katutubo Name" disabled={!props.formData.katutubo} showSearch optionFilterProp="children" style={{ width: '100%' }} filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
               <Option value="" disabled>Katutubo Name</Option>
               <Option value="OTHERS">OTHERS</Option>
               <Option value="ABELLING/ABORLIN">ABELLING/ABORLIN</Option>
@@ -582,41 +674,32 @@ const HheadForm = (props) => {
             <Checkbox value="Y">Others</Checkbox>
           </Form.Item>
           <Form.Item style={{ width: '16.3%' }} label="" name="others_name" hasFeedback {...displayErrors('others_name')}>
-              <Input autoComplete="off" placeholder="Others Name" />
+              <Input autoComplete="off" placeholder="Others Name" disabled={!props.formData.bene_others} />
             </Form.Item>
         </Input.Group>
         <Divider />
+        <div style={{position: "absolute", width: "96%"}}>
+          <div style={{paddingTop: "5px"}} className="float-right">
+            <Button type="primary" onClick={() => addMember()}>
+              Add Member
+            </Button>  
+            <Button type="danger" onClick={removeLastMember}>
+              Remove Last Row
+            </Button>
+          </div>
+        </div>
         <h3 style={{textAlign: "center"}}>Household Members</h3>
-        <Input.Group compact>
-          <Form.Item  style={{ width: '10%' }} label="Last Name">
-          </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label="First Name">
-          </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label="Middle Name">
-          </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label="Ext">
-          </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="Relasyon">
-          </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="Kapanganakan">
-          </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label="Kasarian">
-          </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="Trabaho">
-          </Form.Item>
-          <Form.Item  style={{ width: '9.5%' }} label="Sektor">
-          </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label="Kondisyon ng Kalusugan">
-          </Form.Item>
-        </Input.Group>
-        <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit" disabled={submit}>
-            Submit
-          </Button>
-        </Form.Item>
       </Form>
-      <HmemberForm memberIndex={0} />
-      <HmemberForm memberIndex={1} />
+      { populateMembers() }
+      <Divider />
+      <div className="d-flex justify-content-center">
+      <Button type="primary" htmlType="submit" form="basic" disabled={submit}>
+        Submit
+      </Button>
+      </div>
+      <br />
+      
+      
     </div>
   );
 }

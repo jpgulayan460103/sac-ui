@@ -3,9 +3,9 @@ import ls from 'local-storage'
 const initialState = () => {
   return {
     formData: {},
-    members: [
-      {},{}
-    ],
+    members: {
+      0: {}
+    },
     formError: {},
     formType: "create",
     formStatus: "hide",
@@ -25,6 +25,9 @@ export default function hheadReducer(state = initialState(), action) {
       state.formData = action.data;
       return state
     case 'SET_HMEMBER_FORM_DATA':
+      state.members = action.data;
+      return state
+    case 'ADD_HMEMBERS':
       state.members = action.data;
       return state
     case 'SET_HHEAD':
