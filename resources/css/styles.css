@@ -1,0 +1,43 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+#components-layout-demo-side .logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px;
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+.site-layout-background-index{
+  /* background: ; */
+}
+.logo{
+  height: 60px;
+}
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+.navbar-brand>img {
+  padding: 0px;
+}
+.navbar, .navbar-expand-md, .navbar-light, .bg-light{
+  padding: 0px;
+}
+
+.site-back-top-basic {
+  color: rgba(64, 64, 64, 0.6);
+}
+.ant-layout-sider-children{
+  color: rgba(0, 0, 0, 0.6);
+}
+.anticon{
+  position: relative !important;
+  top: -0.25em !important;
+}
+.main-layout-container{
+  background: rgba(255, 255, 255, 0.2);
+}
