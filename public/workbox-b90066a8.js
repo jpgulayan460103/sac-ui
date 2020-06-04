@@ -1,7 +1,7 @@
-define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
+define("./workbox-b90066a8.js",['exports'], function (exports) { 'use strict';
 
     try {
-      self['workbox:core:5.0.0'] && _();
+      self['workbox:core:5.1.3'] && _();
     } catch (e) {}
 
     /*
@@ -102,13 +102,10 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
     */
 
     const getFriendlyURL = url => {
-      const urlObj = new URL(String(url), location.href);
+      const urlObj = new URL(String(url), location.href); // See https://github.com/GoogleChrome/workbox/issues/2323
+      // We want to include everything, except for the origin if it's same-origin.
 
-      if (urlObj.origin === location.origin) {
-        return urlObj.pathname;
-      }
-
-      return urlObj.href;
+      return urlObj.href.replace(new RegExp(`^${location.origin}`), '');
     };
 
     /*
@@ -195,15 +192,6 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
 
         return `The '${paramName}' parameter was given a value with an ` + `unexpected value. ${validValueDescription} Received a value of ` + `${JSON.stringify(value)}.`;
       },
-      'not-in-sw': ({
-        moduleName
-      }) => {
-        if (!moduleName) {
-          throw new Error(`Unexpected input to 'not-in-sw' error.`);
-        }
-
-        return `The '${moduleName}' must be used in a service worker.`;
-      },
       'not-an-array': ({
         moduleName,
         className,
@@ -273,7 +261,7 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
           throw new Error(`Unexpected input to ` + `'add-to-cache-list-duplicate-entries' error.`);
         }
 
-        return `Two of the entries passed to ` + `'workbox-precaching.PrecacheController.addToCacheList()' had the URL ` + `${firstEntry._entryId} but different revision details. Workbox is ` + `is unable to cache and version the asset correctly. Please remove one ` + `of the entries.`;
+        return `Two of the entries passed to ` + `'workbox-precaching.PrecacheController.addToCacheList()' had the URL ` + `${firstEntry._entryId} but different revision details. Workbox is ` + `unable to cache and version the asset correctly. Please remove one ` + `of the entries.`;
       },
       'plugin-error-request-will-fetch': ({
         thrownError
@@ -505,7 +493,7 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
        * be added as a key on the context object.
        */
       constructor(errorCode, details) {
-        let message = messageGenerator(errorCode, details);
+        const message = messageGenerator(errorCode, details);
         super(message);
         this.name = errorCode;
         this.details = details;
@@ -521,23 +509,11 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
       https://opensource.org/licenses/MIT.
     */
     /*
-     * This method returns true if the current context is a service worker.
-     */
-
-    const isSWEnv = moduleName => {
-      if (!('ServiceWorkerGlobalScope' in self)) {
-        throw new WorkboxError('not-in-sw', {
-          moduleName
-        });
-      }
-    };
-    /*
      * This method throws if the supplied value is not an array.
      * The destructed values are required to produce a meaningful error for users.
      * The destructed and restructured object is so it's clear what is
      * needed.
      */
-
 
     const isArray = (value, details) => {
       if (!Array.isArray(value)) {
@@ -582,7 +558,7 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
         throw error;
       }
 
-      for (let item of value) {
+      for (const item of value) {
         if (!(item instanceof expectedClass)) {
           throw error;
         }
@@ -594,7 +570,6 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
       isArray,
       isInstance,
       isOneOf,
-      isSWEnv,
       isType,
       isArrayOfClass
     };
@@ -663,107 +638,130 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
       https://opensource.org/licenses/MIT.
     */
     /**
-     * Wrapper around cache.put().
-     *
-     * Will call `cacheDidUpdate` on plugins if the cache was updated, using
-     * `matchOptions` when determining what the old entry is.
+     * Checks the list of plugins for the cacheKeyWillBeUsed callback, and
+     * executes any of those callbacks found in sequence. The final `Request` object
+     * returned by the last plugin is treated as the cache key for cache reads
+     * and/or writes.
      *
      * @param {Object} options
-     * @param {string} options.cacheName
      * @param {Request} options.request
-     * @param {Response} options.response
-     * @param {Event} [options.event]
+     * @param {string} options.mode
      * @param {Array<Object>} [options.plugins=[]]
-     * @param {Object} [options.matchOptions]
+     * @return {Promise<Request>}
      *
      * @private
      * @memberof module:workbox-core
      */
 
-    const putWrapper = async ({
-      cacheName,
+    const _getEffectiveRequest = async ({
       request,
-      response,
-      event,
-      plugins = [],
-      matchOptions
+      mode,
+      plugins = []
     }) => {
-      {
-        if (request.method && request.method !== 'GET') {
-          throw new WorkboxError('attempt-to-cache-non-get-request', {
-            url: getFriendlyURL(request.url),
-            method: request.method
+      const cacheKeyWillBeUsedPlugins = pluginUtils.filter(plugins, "cacheKeyWillBeUsed"
+      /* CACHE_KEY_WILL_BE_USED */
+      );
+      let effectiveRequest = request;
+
+      for (const plugin of cacheKeyWillBeUsedPlugins) {
+        effectiveRequest = await plugin["cacheKeyWillBeUsed"
+        /* CACHE_KEY_WILL_BE_USED */
+        ].call(plugin, {
+          mode,
+          request: effectiveRequest
+        });
+
+        if (typeof effectiveRequest === 'string') {
+          effectiveRequest = new Request(effectiveRequest);
+        }
+
+        {
+          finalAssertExports.isInstance(effectiveRequest, Request, {
+            moduleName: 'Plugin',
+            funcName: "cacheKeyWillBeUsed"
+            /* CACHE_KEY_WILL_BE_USED */
+            ,
+            isReturnValueProblem: true
           });
         }
       }
 
-      const effectiveRequest = await _getEffectiveRequest({
-        plugins,
-        request,
-        mode: 'write'
-      });
+      return effectiveRequest;
+    };
+    /**
+     * This method will call cacheWillUpdate on the available plugins (or use
+     * status === 200) to determine if the Response is safe and valid to cache.
+     *
+     * @param {Object} options
+     * @param {Request} options.request
+     * @param {Response} options.response
+     * @param {Event} [options.event]
+     * @param {Array<Object>} [options.plugins=[]]
+     * @return {Promise<Response>}
+     *
+     * @private
+     * @memberof module:workbox-core
+     */
 
-      if (!response) {
+
+    const _isResponseSafeToCache = async ({
+      request,
+      response,
+      event,
+      plugins = []
+    }) => {
+      let responseToCache = response;
+      let pluginsUsed = false;
+
+      for (const plugin of plugins) {
+        if ("cacheWillUpdate"
+        /* CACHE_WILL_UPDATE */
+        in plugin) {
+          pluginsUsed = true;
+          const pluginMethod = plugin["cacheWillUpdate"
+          /* CACHE_WILL_UPDATE */
+          ];
+          responseToCache = await pluginMethod.call(plugin, {
+            request,
+            response: responseToCache,
+            event
+          });
+
+          {
+            if (responseToCache) {
+              finalAssertExports.isInstance(responseToCache, Response, {
+                moduleName: 'Plugin',
+                funcName: "cacheWillUpdate"
+                /* CACHE_WILL_UPDATE */
+                ,
+                isReturnValueProblem: true
+              });
+            }
+          }
+
+          if (!responseToCache) {
+            break;
+          }
+        }
+      }
+
+      if (!pluginsUsed) {
         {
-          logger.error(`Cannot cache non-existent response for ` + `'${getFriendlyURL(effectiveRequest.url)}'.`);
+          if (responseToCache) {
+            if (responseToCache.status !== 200) {
+              if (responseToCache.status === 0) {
+                logger.warn(`The response for '${request.url}' is an opaque ` + `response. The caching strategy that you're using will not ` + `cache opaque responses by default.`);
+              } else {
+                logger.debug(`The response for '${request.url}' returned ` + `a status code of '${response.status}' and won't be cached as a ` + `result.`);
+              }
+            }
+          }
         }
 
-        throw new WorkboxError('cache-put-with-no-response', {
-          url: getFriendlyURL(effectiveRequest.url)
-        });
+        responseToCache = responseToCache && responseToCache.status === 200 ? responseToCache : undefined;
       }
 
-      let responseToCache = await _isResponseSafeToCache({
-        event,
-        plugins,
-        response,
-        request: effectiveRequest
-      });
-
-      if (!responseToCache) {
-        {
-          logger.debug(`Response '${getFriendlyURL(effectiveRequest.url)}' will ` + `not be cached.`, responseToCache);
-        }
-
-        return;
-      }
-
-      const cache = await self.caches.open(cacheName);
-      const updatePlugins = pluginUtils.filter(plugins, "cacheDidUpdate"
-      /* CACHE_DID_UPDATE */
-      );
-      let oldResponse = updatePlugins.length > 0 ? await matchWrapper({
-        cacheName,
-        matchOptions,
-        request: effectiveRequest
-      }) : null;
-
-      {
-        logger.debug(`Updating the '${cacheName}' cache with a new Response for ` + `${getFriendlyURL(effectiveRequest.url)}.`);
-      }
-
-      try {
-        await cache.put(effectiveRequest, responseToCache);
-      } catch (error) {
-        // See https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-QuotaExceededError
-        if (error.name === 'QuotaExceededError') {
-          await executeQuotaErrorCallbacks();
-        }
-
-        throw error;
-      }
-
-      for (let plugin of updatePlugins) {
-        await plugin["cacheDidUpdate"
-        /* CACHE_DID_UPDATE */
-        ].call(plugin, {
-          cacheName,
-          event,
-          oldResponse,
-          newResponse: responseToCache,
-          request: effectiveRequest
-        });
-      }
+      return responseToCache ? responseToCache : null;
     };
     /**
      * This is a wrapper around cache.match().
@@ -837,131 +835,108 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
       return cachedResponse;
     };
     /**
-     * This method will call cacheWillUpdate on the available plugins (or use
-     * status === 200) to determine if the Response is safe and valid to cache.
+     * Wrapper around cache.put().
+     *
+     * Will call `cacheDidUpdate` on plugins if the cache was updated, using
+     * `matchOptions` when determining what the old entry is.
      *
      * @param {Object} options
+     * @param {string} options.cacheName
      * @param {Request} options.request
      * @param {Response} options.response
      * @param {Event} [options.event]
      * @param {Array<Object>} [options.plugins=[]]
-     * @return {Promise<Response>}
+     * @param {Object} [options.matchOptions]
      *
      * @private
      * @memberof module:workbox-core
      */
 
 
-    const _isResponseSafeToCache = async ({
+    const putWrapper = async ({
+      cacheName,
       request,
       response,
       event,
-      plugins = []
+      plugins = [],
+      matchOptions
     }) => {
-      let responseToCache = response;
-      let pluginsUsed = false;
-
-      for (let plugin of plugins) {
-        if ("cacheWillUpdate"
-        /* CACHE_WILL_UPDATE */
-        in plugin) {
-          pluginsUsed = true;
-          const pluginMethod = plugin["cacheWillUpdate"
-          /* CACHE_WILL_UPDATE */
-          ];
-          responseToCache = await pluginMethod.call(plugin, {
-            request,
-            response: responseToCache,
-            event
+      {
+        if (request.method && request.method !== 'GET') {
+          throw new WorkboxError('attempt-to-cache-non-get-request', {
+            url: getFriendlyURL(request.url),
+            method: request.method
           });
-
-          {
-            if (responseToCache) {
-              finalAssertExports.isInstance(responseToCache, Response, {
-                moduleName: 'Plugin',
-                funcName: "cacheWillUpdate"
-                /* CACHE_WILL_UPDATE */
-                ,
-                isReturnValueProblem: true
-              });
-            }
-          }
-
-          if (!responseToCache) {
-            break;
-          }
         }
       }
 
-      if (!pluginsUsed) {
+      const effectiveRequest = await _getEffectiveRequest({
+        plugins,
+        request,
+        mode: 'write'
+      });
+
+      if (!response) {
         {
-          if (responseToCache) {
-            if (responseToCache.status !== 200) {
-              if (responseToCache.status === 0) {
-                logger.warn(`The response for '${request.url}' is an opaque ` + `response. The caching strategy that you're using will not ` + `cache opaque responses by default.`);
-              } else {
-                logger.debug(`The response for '${request.url}' returned ` + `a status code of '${response.status}' and won't be cached as a ` + `result.`);
-              }
-            }
-          }
+          logger.error(`Cannot cache non-existent response for ` + `'${getFriendlyURL(effectiveRequest.url)}'.`);
         }
 
-        responseToCache = responseToCache && responseToCache.status === 200 ? responseToCache : undefined;
+        throw new WorkboxError('cache-put-with-no-response', {
+          url: getFriendlyURL(effectiveRequest.url)
+        });
       }
 
-      return responseToCache ? responseToCache : null;
-    };
-    /**
-     * Checks the list of plugins for the cacheKeyWillBeUsed callback, and
-     * executes any of those callbacks found in sequence. The final `Request` object
-     * returned by the last plugin is treated as the cache key for cache reads
-     * and/or writes.
-     *
-     * @param {Object} options
-     * @param {Request} options.request
-     * @param {string} options.mode
-     * @param {Array<Object>} [options.plugins=[]]
-     * @return {Promise<Request>}
-     *
-     * @private
-     * @memberof module:workbox-core
-     */
+      const responseToCache = await _isResponseSafeToCache({
+        event,
+        plugins,
+        response,
+        request: effectiveRequest
+      });
 
+      if (!responseToCache) {
+        {
+          logger.debug(`Response '${getFriendlyURL(effectiveRequest.url)}' will ` + `not be cached.`, responseToCache);
+        }
 
-    const _getEffectiveRequest = async ({
-      request,
-      mode,
-      plugins = []
-    }) => {
-      const cacheKeyWillBeUsedPlugins = pluginUtils.filter(plugins, "cacheKeyWillBeUsed"
-      /* CACHE_KEY_WILL_BE_USED */
+        return;
+      }
+
+      const cache = await self.caches.open(cacheName);
+      const updatePlugins = pluginUtils.filter(plugins, "cacheDidUpdate"
+      /* CACHE_DID_UPDATE */
       );
-      let effectiveRequest = request;
+      const oldResponse = updatePlugins.length > 0 ? await matchWrapper({
+        cacheName,
+        matchOptions,
+        request: effectiveRequest
+      }) : null;
 
-      for (const plugin of cacheKeyWillBeUsedPlugins) {
-        effectiveRequest = await plugin["cacheKeyWillBeUsed"
-        /* CACHE_KEY_WILL_BE_USED */
+      {
+        logger.debug(`Updating the '${cacheName}' cache with a new Response for ` + `${getFriendlyURL(effectiveRequest.url)}.`);
+      }
+
+      try {
+        await cache.put(effectiveRequest, responseToCache);
+      } catch (error) {
+        // See https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-QuotaExceededError
+        if (error.name === 'QuotaExceededError') {
+          await executeQuotaErrorCallbacks();
+        }
+
+        throw error;
+      }
+
+      for (const plugin of updatePlugins) {
+        await plugin["cacheDidUpdate"
+        /* CACHE_DID_UPDATE */
         ].call(plugin, {
-          mode,
+          cacheName,
+          event,
+          oldResponse,
+          newResponse: responseToCache,
           request: effectiveRequest
         });
-
-        if (typeof effectiveRequest === 'string') {
-          effectiveRequest = new Request(effectiveRequest);
-        }
-
-        {
-          finalAssertExports.isInstance(effectiveRequest, Request, {
-            moduleName: 'Plugin',
-            funcName: "cacheKeyWillBeUsed"
-            /* CACHE_KEY_WILL_BE_USED */
-            ,
-            isReturnValueProblem: true
-          });
-        }
       }
-
-      return effectiveRequest;
     };
 
     const cacheWrapper = {
@@ -1036,7 +1011,7 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
       const originalRequest = failedFetchPlugins.length > 0 ? request.clone() : null;
 
       try {
-        for (let plugin of plugins) {
+        for (const plugin of plugins) {
           if ("requestWillFetch"
           /* REQUEST_WILL_FETCH */
           in plugin) {
@@ -1071,7 +1046,7 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
       // to the Request we make. Pass both to `fetchDidFail` to aid debugging.
 
 
-      let pluginFilteredRequest = request.clone();
+      const pluginFilteredRequest = request.clone();
 
       try {
         let fetchResponse; // See https://github.com/GoogleChrome/workbox/issues/1796
@@ -1216,7 +1191,7 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
     }
 
     try {
-      self['workbox:precaching:5.0.0'] && _();
+      self['workbox:precaching:5.1.3'] && _();
     } catch (e) {}
 
     /*
@@ -2275,4 +2250,4 @@ define("./workbox-2a328db9.js",['exports'], function (exports) { 'use strict';
     exports.skipWaiting = skipWaiting;
 
 });
-//# sourceMappingURL=workbox-2a328db9.js.map
+//# sourceMappingURL=workbox-b90066a8.js.map

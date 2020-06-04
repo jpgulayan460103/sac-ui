@@ -53,6 +53,8 @@ const HheadForm = (props) => {
         switch (key) {
           case 'sektor':
           case 'kondisyon_ng_kalusugan':
+          case 'uri_ng_id':
+          case 'katutubo_name':
             transformedValue[key] = value;
             break;
           default:
@@ -97,9 +99,16 @@ const HheadForm = (props) => {
         ...transformedValue
       }
     })
+    console.log(props.formData);
+    
+    console.log({
+      ...props.formData,
+      ...transformedValue
+    });
+    
   }
   const formSubmit = _debounce(() => {
-    console.log(props.members);
+    console.log(props.formData);
     
   }, 250)
   const displayErrors = (field) => {
@@ -222,7 +231,25 @@ const HheadForm = (props) => {
             <Input autoComplete="off" placeholder="Kalye" />
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Uri ng ID" name="uri_ng_id" hasFeedback {...displayErrors('uri_ng_id')}>
-            <Input autoComplete="off" placeholder="Uri ng ID" />
+            <Select placeholder="Uri ng ID" showSearch optionFilterProp="children" style={{ width: '100%' }} filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              <Option value="Others">Others</Option>
+              <Option value="Barangay Certification">Barangay Certification</Option>
+              <Option value="Driver's License">Driver's License</Option>
+              <Option value="Employment ID">Employment ID</Option>
+              <Option value="GSIS UMID">GSIS UMID</Option>
+              <Option value="NCIP Certification">NCIP Certification</Option>
+              <Option value="OFW">OFW</Option>
+              <Option value="Passport">Passport</Option>
+              <Option value="PhilHealth">PhilHealth</Option>
+              <Option value="Postal">Postal</Option>
+              <Option value="PRC">PRC</Option>
+              <Option value="PWD">PWD</Option>
+              <Option value="Senior Citizen">Senior Citizen</Option>
+              <Option value="Solo Parent">Solo Parent</Option>
+              <Option value="SSS UMID">SSS UMID</Option>
+              <Option value="TIN">TIN</Option>
+              <Option value="Voter's ID">Voter's ID</Option>
+            </Select>
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
@@ -243,8 +270,11 @@ const HheadForm = (props) => {
           <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')}>
             <Input autoComplete="off" placeholder="Rehiyon" />
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Petsa ng kapanganakan" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')}>
+          <Form.Item style={{ width: '23%' }} label="Petsa ng kapanganakan" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')}>
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
+          </Form.Item>
+          <Form.Item style={{ width: '10%' }} label="Edad" name="age">
+            <Input autoComplete="off" placeholder="Edad" disabled />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>

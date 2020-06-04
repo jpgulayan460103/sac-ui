@@ -137,8 +137,11 @@ const HmemberForm = (props) => {
               <option value="8 - Iba pang Kamag-anak">8 - Iba pang Kamag-anak</option>
             </select>
           </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label={diplayLabel("Kapanganakan",props.memberIndex)} name="kapanganakan" {...displayErrors('kapanganakan')}>
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Kapanganakan",props.memberIndex)} name="kapanganakan" {...displayErrors('kapanganakan')}>
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
+          </Form.Item>
+          <Form.Item  style={{ width: '5%' }} label={diplayLabel("Edad",props.memberIndex)} name="age">
+            <Input autoComplete="off" placeholder="Edad" disabled />
           </Form.Item>
           <Form.Item  style={{ width: '10%' }} label={diplayLabel("Kasarian",props.memberIndex)} name="kasarian" {...displayErrors('kasarian')}>
             <select placeholder="Kasarian" value="" className="form-control form-control-sm" style={{height: "26px"}}>

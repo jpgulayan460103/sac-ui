@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import React, { Component } from 'react';
 import { Provider } from 'react-redux'
-import store from '../store'
 import Layouts from './../layouts/layouts'
 import HheadForm from '../components/Hhead/HheadForm'
+import store from '../store'
 
 export class index extends Component {
   constructor(props){
