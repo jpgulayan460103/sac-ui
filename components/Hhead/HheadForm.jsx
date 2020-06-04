@@ -40,12 +40,73 @@ const HheadForm = (props) => {
   const [formData, setFormData] = useState({});
   const [submit, setSubmit] = useState(false);
   const [membersCount, setMembersCount] = useState(1);
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
   const formRef = React.useRef();
   useEffect(() => {
     formRef.current.setFieldsValue({
       ...props.formData
     });
   }, [props.formData]);
+  useEffect(() => {
+    getProvinces();
+  }, []);
+  const getProvinces = () => {
+    API.Barangay.getProvinces()
+    .then(res => {
+      setProvinces(res.data.provinces);
+    })
+    .catch(res => {
+    })
+    .then(res => {})
+    ;;
+  }
+  const getCities = (e) => {
+    setCities([]);
+    API.Barangay.getCities(e)
+    .then(res => {
+      setCities(res.data.cities);
+    })
+    .catch(res => {
+    })
+    .then(res => {})
+    ;;
+  }
+  const getBarangays = (city_psgc) => {
+    setBarangays([]);
+    let province_psgc = props.formData.probinsya;
+    API.Barangay.getBarangays(province_psgc,city_psgc)
+    .then(res => {
+      setBarangays(res.data.barangays);
+    })
+    .catch(res => {
+    })
+    .then(res => {})
+    ;;
+  }
+
+  const populateProvinces = () => {
+    let items = [];
+    provinces.map(item => {
+      items.push(<Option value={item.province_psgc}>{item.province_name}</Option>);
+    })
+    return items;
+  }
+  const populateCities = () => {
+    let items = [];
+    cities.map(item => {
+      items.push(<Option value={item.city_psgc}>{item.city_name}</Option>);
+    })
+    return items;
+  }
+  const populateBarangays = () => {
+    let items = [];
+    barangays.map(item => {
+      items.push(<Option value={item.barangay_psgc}>{item.barangay_name}</Option>);
+    })
+    return items;
+  }
   const setFormFields = (e) => {
     let transformedValue = {};
     _forEach(e, function(value, key) {
@@ -253,22 +314,28 @@ const HheadForm = (props) => {
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay" hasFeedback {...displayErrors('barangay')}>
-            <Input autoComplete="off" placeholder="Barangay" />
+          <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay" {...displayErrors('barangay')}>
+          <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }}>
+              { populateBarangays() }
+            </Select>
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Lungsod/Bayan" name="lungsod" hasFeedback {...displayErrors('lungsod')}>
-            <Input autoComplete="off" placeholder="Lungsod/Bayan" />
+          <Form.Item style={{ width: '33%' }} label="Lungsod/Bayan" name="lungsod" {...displayErrors('lungsod')}>
+            <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={props.formData.barangay && props.formData.barangay != ""}>
+              { populateCities() }
+            </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Numero ng ID" name="numero_ng_id" hasFeedback {...displayErrors('numero_ng_id')}>
             <Input autoComplete="off" placeholder="Numero ng ID" />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item style={{ width: '33%' }} label="Probinsya" name="probinsya" hasFeedback {...displayErrors('probinsya')}>
-            <Input autoComplete="off" placeholder="Probinsya" />
+          <Form.Item style={{ width: '33%' }} label="Probinsya" name="probinsya" {...displayErrors('probinsya')}>
+          <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={props.formData.lungsod && props.formData.lungsod != ""}>
+            { populateProvinces() }
+          </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')}>
-            <Input autoComplete="off" placeholder="Rehiyon" />
+            <Input autoComplete="off" placeholder="Rehiyon" value="XI" disabled/>
           </Form.Item>
           <Form.Item style={{ width: '23%' }} label="Petsa ng kapanganakan" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')}>
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
