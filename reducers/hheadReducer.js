@@ -2,7 +2,12 @@ import ls from 'local-storage'
 
 const initialState = () => {
   return {
-    formData: {},
+    formData: {
+      bene_uct: false,
+      bene_4ps: false,
+      katutubo: false,
+      bene_others: false,
+    },
     members: {
       0: {}
     },
@@ -20,8 +25,10 @@ export default function hheadReducer(state = initialState(), action) {
       return state;
       break;
     case 'HHEAD_FORM_ERROR':
-      state.formError = action.data;
-      return state;
+      return {
+        ...state,
+        formError: action.data,
+      };
       break;
     case 'SET_HHEAD_FORM_DATA':
       return {

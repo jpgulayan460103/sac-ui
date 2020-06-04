@@ -21,10 +21,10 @@ const HmemberForm = (props) => {
   const formRef = React.useRef();
   const [formData, setFormData] = useState({});
   const displayErrors = (field) => {
-    if(props.formError[field]){
+    if(props.formError[`members.${props.memberIndex}.${field}`]){
       return {
         validateStatus: 'error',
-        help: props.formError[field][0]
+        help: props.formError[`members.${props.memberIndex}.${field}`][0]
       }
     }
   }
@@ -124,7 +124,7 @@ const HmemberForm = (props) => {
           <Form.Item  style={{ width: '5%' }} label={diplayLabel("Ext",props.memberIndex)} name="ext_name" {...displayErrors('ext_name')}>
             <Input autoComplete="off" placeholder="Ext Name" />
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Relasyon",props.memberIndex)} name="relasyon_sa_punong_pamilya" {...displayErrors('relasyon_sa_punong_pamilya')}>
+          <Form.Item  style={{ width: '13%' }} label={diplayLabel("Relasyon",props.memberIndex)} name="relasyon_sa_punong_pamilya" {...displayErrors('relasyon_sa_punong_pamilya')}>
             <select placeholder="Relasyon sa Puno ng Pamilya" value="" className="form-control form-control-sm" style={{height: "26px"}}>
               <option value="">Relasyon sa Puno ng Pamilya</option>
               {/* <option value="1 - Puno ng Pamilya">1 - Puno ng Pamilya</option> */}
@@ -143,7 +143,7 @@ const HmemberForm = (props) => {
           <Form.Item  style={{ width: '5%' }} label={diplayLabel("Edad",props.memberIndex)} name="age">
             <Input autoComplete="off" placeholder="Edad" disabled />
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Kasarian",props.memberIndex)} name="kasarian" {...displayErrors('kasarian')}>
+          <Form.Item  style={{ width: '7%' }} label={diplayLabel("Kasarian",props.memberIndex)} name="kasarian" {...displayErrors('kasarian')}>
             <select placeholder="Kasarian" value="" className="form-control form-control-sm" style={{height: "26px"}}>
               <option value="">Kasarian</option>
               <option value="M">M</option>
@@ -157,9 +157,9 @@ const HmemberForm = (props) => {
             <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}}>
               <option value="">Sektor</option>
               <option value="W - Wala sa pagpipilian">W - Wala sa pagpipilian</option>
-              { (formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
-              { (formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>}
-              { (formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>}
+              { (typeof formData.age != undefined && formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
+              { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>}
+              { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>}
               <option value="D - PWD">D - PWD</option>
               <option value="E - Solo Parent">E - Solo Parent</option>
               <option value="F - Walang Tirahan">F - Walang Tirahan</option>

@@ -17,13 +17,13 @@ export default {
     });
   },
   getBarangays(province_psgc, city_psgc){
-    return axios.get(`provinces/${province_psgc}/cities/${city_psgc}/barangays`);
+    return axios.get(`api/provinces/${province_psgc}/cities/${city_psgc}/barangays`);
   },
   getProvinces(){
-    return axios.get(`provinces`);
+    return axios.get(`api/provinces`);
   },
   getCities(province_psgc){
-    return axios.get(`provinces/${province_psgc}/cities`);
+    return axios.get(`api/provinces/${province_psgc}/cities`);
   },
   get(id){
     return axios.get(`api/barangay-officials/${id}`);
