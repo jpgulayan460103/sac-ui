@@ -9,11 +9,13 @@ const initialState = () => {
       bene_others: false,
     },
     members: {
-      0: {}
+      0: {
+        type: "new",
+      }
     },
     formError: {},
     formType: "create",
-    formStatus: "hide",
+    formStatus: "new",
     selectedHhead: {},
   }
 }
@@ -46,6 +48,12 @@ export default function hheadReducer(state = initialState(), action) {
       return {
         ...state,
         members: action.data,
+      };
+      break;
+    case 'SET_HMEMBER_FORM_STATUS':
+      return {
+        ...state,
+        formStatus: action.data,
       };
       break;
     case 'SET_HHEAD':

@@ -20,7 +20,7 @@ export class index extends Component {
           <title>Dashboard</title>
         </Head>
         <Layouts>
-          <HheadForm />
+          <HheadForm viewStatus="edit" />
         </Layouts>
       </Provider>
     );

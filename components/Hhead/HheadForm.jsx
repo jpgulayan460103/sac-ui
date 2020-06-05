@@ -24,6 +24,7 @@ function mapStateToProps(state) {
     formData: state.hhead.formData,
     formError: state.hhead.formError,
     members: state.hhead.members,
+    formStatus: state.hhead.formStatus,
   };
 }
 const handleClick = () => {}
@@ -47,13 +48,25 @@ const HheadForm = (props) => {
   const formRef = React.useRef();
   const secondFormRef = React.useRef();
   useEffect(() => {
-    formRef.current.setFieldsValue({
-      ...props.formData
-    });
-    secondFormRef.current.setFieldsValue({
-      ...props.formData
-    });
+    if(props.viewStatus == "edit"){
+      formRef.current.setFieldsValue({
+        ...props.formData
+      });
+      secondFormRef.current.setFieldsValue({
+        ...props.formData
+      });
+    }
   }, [props.formData]);
+  useEffect(() => {
+    if(props.viewStatus == "view"){
+      formRef.current.setFieldsValue({
+        ...props.viewData
+      });
+      secondFormRef.current.setFieldsValue({
+        ...props.viewData
+      });
+    }
+  }, [props.viewStatus]);
   useEffect(() => {
     getProvinces();
   }, []);
@@ -117,6 +130,10 @@ const HheadForm = (props) => {
     return str.length < max ? pad("0" + str, max) : str;
   }
   const setFormFields = (e) => {
+    props.dispatch({
+      type: "SET_HMEMBER_FORM_STATUS",
+      data: "old"
+    })
     let transformedValue = {};
     _forEach(e, function(value, key) {
       if(typeof value == "string"){
@@ -174,10 +191,12 @@ const HheadForm = (props) => {
     })
   }
   const formSubmit = _debounce(() => {
+    setSubmit(true);
     let formData = props.formData;
     let members = props.members;
     API.Hhead.save(formData, members)
     .then(res => {
+      setSubmit(false);
       let newForm = {};
       newForm.probinsya = props.formData.probinsya;
       newForm.lungsod = props.formData.lungsod;
@@ -197,19 +216,37 @@ const HheadForm = (props) => {
       secondFormRef.current.setFieldsValue({
         ...newForm
       });
-      // for (let index = 0; index < membersCount; index++) {
-      //   removeLastMember();
-      // }
-      // setMembersCount(1);
-      // addMember();
+      if(membersCount>0){
+        setMembersCount(1);
+        props.dispatch({
+          type: "ADD_HMEMBERS",
+          data: {
+            0:{
+              type: "new",
+            }
+          }
+        })
+      } 
+      props.dispatch({
+        type: "SET_HMEMBER_FORM_STATUS",
+        data: "new"
+      })
+
+      props.dispatch({
+        type: "HHEAD_FORM_ERROR",
+        data: {}
+      })
     })
     .catch(err => {
+      setSubmit(false);
       props.dispatch({
         type: "HHEAD_FORM_ERROR",
         data: err.response.data.errors
       })
     })
-    .then(res => {})
+    .then(res => {
+      setSubmit(false);
+    })
     ;
   }, 250)
   const displayErrors = (field) => {
@@ -235,7 +272,9 @@ const HheadForm = (props) => {
   const addMember = () => {
     setMembersCount(membersCount + 1);
     let members = props.members;
-    members[membersCount] = {};
+    members[membersCount] = {
+      type: "new",
+    };
     props.dispatch({
       type: "ADD_HMEMBERS",
       data: {
@@ -298,7 +337,7 @@ const HheadForm = (props) => {
 
   return (
     <div>
-      <Form ref={formRef} name="basic" onValuesChange={setFormFields} onFinish={formSubmit} size="small" >
+      <Form disabled={props.viewStatus == "view"} ref={formRef} name="basic" onValuesChange={setFormFields} onFinish={formSubmit} size="small" >
       <Title level={2} style={{textAlign: "center"}}>Household Head</Title>
         <Input.Group compact>
           <Form.Item  style={{ width: '20%' }} label="Last Name" name="last_name" hasFeedback {...displayErrors('last_name')}>
@@ -848,9 +887,11 @@ const HheadForm = (props) => {
       </Form>
       <Divider />
       <div className="d-flex justify-content-center">
-      <Button type="primary" htmlType="submit" form="basic" disabled={submit}>
-        Submit
-      </Button>
+      { props.viewStatus == "edit" ? (
+        <Button type="primary" htmlType="submit" form="basic" disabled={submit}>
+          Submit
+        </Button>
+      ) : "" }
       </div>
       <br />
       <br />

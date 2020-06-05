@@ -13,6 +13,7 @@ function mapStateToProps(state) {
     formError: state.hhead.formError,
     formData: state.hhead.formData,
     members: state.hhead.members,
+    formStatus: state.hhead.formStatus,
   };
 }
 
@@ -34,6 +35,12 @@ const HmemberForm = (props) => {
     });
     setFormData(props.members[props.memberIndex]);
   }, [props.members]);
+  useEffect(() => {
+    resetForm();
+  }, [props.formStatus]);
+  const resetForm = () => {
+    formRef.current.resetFields();
+  }
   const getAge = (dateString) => {
     var today = new Date();
     var birthDate = new Date(dateString);
@@ -47,6 +54,7 @@ const HmemberForm = (props) => {
   const setFormFields = (e) => {
     let transformedValue = {};
     _forEach(e, function(value, key) {
+      transformedValue['type'] = 'old';
       if(typeof value == "string"){
         switch (key) {
           case 'sektor':
