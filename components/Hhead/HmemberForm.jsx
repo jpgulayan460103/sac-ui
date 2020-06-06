@@ -120,14 +120,14 @@ const HmemberForm = (props) => {
     <React.Fragment>
       <Form ref={formRef} name="basic" onValuesChange={setFormFields} size="small" >
       <Input.Group compact>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Last Name",props.memberIndex)} name="last_name" {...displayErrors('last_name')}>
-            <Input autoComplete="off" placeholder="Last Name" />
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Apelyido",props.memberIndex)} name="last_name" {...displayErrors('last_name')}>
+            <Input autoComplete="off" placeholder="Apelyido" />
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("First Name",props.memberIndex)} name="first_name" {...displayErrors('first_name')}>
-            <Input autoComplete="off" placeholder="First Name" />
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Pangalan",props.memberIndex)} name="first_name" {...displayErrors('first_name')}>
+            <Input autoComplete="off" placeholder="Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Middle Name",props.memberIndex)} name="middle_name" {...displayErrors('middle_name')}>
-            <Input autoComplete="off" placeholder="Middle Name" />
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Gitnang Pangalan",props.memberIndex)} name="middle_name" {...displayErrors('middle_name')}>
+            <Input autoComplete="off" placeholder="Gitnang Pangalan" />
           </Form.Item>
           <Form.Item  style={{ width: '5%' }} label={diplayLabel("Ext",props.memberIndex)} name="ext_name" {...displayErrors('ext_name')}>
             <Input autoComplete="off" placeholder="Ext Name" />

@@ -12,7 +12,7 @@ const userLoginDetail = () => {
   let state = {};
   state.isLogged = true;
   state.user = ls('user').user;
-  state.accessToken = ls('user').access_token;
+  state.accessToken = ls('user').createdToken.access_token;
   return state;
 }
 

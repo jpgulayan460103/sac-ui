@@ -1,109 +1,114 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import Router from 'next/router'
-import {
-  Collapse,
-  Navbar,
-  NavbarToggler,
-  NavbarBrand,
-  Nav,
-  NavItem,
-  NavLink,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  NavbarText
-} from 'reactstrap';
-import { CaretDownOutlined } from '@ant-design/icons';
-import Link from 'next/link'
+import ls from 'local-storage'
+import API from '../api'
 
-class Headers extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      accessToken: "",
-      isLogged: false,
-    };
-    this.toggle = this.toggle.bind(this);
-    this.loggedState = this.loggedState.bind(this);
-    this.logout = this.logout.bind(this);
-    this.redirect = this.redirect.bind(this);
-  }
-  static getDerivedStateFromProps(props, state) {
-    return {
-      isLogged: props.isLogged,
-      accessToken: props.accessToken,
-    };
-  }
-  toggle = () => {
-    this.setState({isOpen: !this.state.isOpen});
-  }
-  loggedState = () => {
-    if(this.state.isLogged){
-      return (
-        <UncontrolledDropdown nav inNavbar>
-          <DropdownToggle nav>
-            {this.props.user.username} <CaretDownOutlined />
-          </DropdownToggle>
-          <DropdownMenu right>
-            <DropdownItem>
-              Change Password
-            </DropdownItem>
-            <DropdownItem divider />
-            <DropdownItem>
-              <NavLink href="#" onClick={() => this.logout() }>Logout</NavLink>
-            </DropdownItem>
-          </DropdownMenu>
-        </UncontrolledDropdown>
-      )
-    }else{
-      return (
-        <NavItem>
-          <NavLink href="/login" onClick={() => this.logout}>Login</NavLink>
-        </NavItem>
-      )
-    }
-  }
-  logout = () => {
-    this.props.dispatch({
-      type: "USER_LOGIN_FAILED",
-      data: {}
-    });
-    Router.push('/login')
-  }
-  redirect = (redirectTo) => {
-    Router.push(`/${redirectTo}`)
-  }
-  render() {
-    return (
-      <div>
-      <Navbar color="light" light expand="md" fixed="top">
-        <NavbarBrand href="#!"  onClick={() => this.redirect('') }>
-        
-        </NavbarBrand>
-        <NavbarToggler onClick={this.toggle} />
-        <Collapse isOpen={this.state.isOpen} navbar>
-          <Nav className="mr-auto" navbar>
-            <NavItem>
-              <NavLink href="#!" onClick={() => this.redirect('about') }>
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink href="https://github.com/reactstrap/reactstrap">asdasd</NavLink>
-            </NavItem>
-          </Nav>
-          <Nav navbar>
-            
-          </Nav>
-        </Collapse>
-      </Navbar>
-    </div>
-    );
-  }
+import {
+  HomeOutlined,
+  SettingFilled,
+  UnorderedListOutlined,
+  UserOutlined,
+  CaretDownOutlined,
+  QuestionCircleOutlined,
+  PoweroffOutlined,
+} from '@ant-design/icons';
+
+import { Menu, Dropdown } from 'antd';
+
+
+function mapStateToProps(state) {
+  return {
+    
+  };
 }
 
-const mapStateToProps = (state) => ({
-  
-});
-export default connect(mapStateToProps)(Headers);
+
+
+const MenuIcon = (props) => {
+  return (
+    <span className="space-x-1">
+      <span>{props.icon}</span>
+    </span>
+  );
+}
+
+const Headers = (props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isShown, setIsShown] = useState(false);
+  const [user, setUser] = useState({});
+  const toggle = () => setIsOpen(!isOpen);
+  useEffect(() => {
+    let loggedUser = ls('auth');
+    setUser(loggedUser);
+  }, []);
+
+  const menu = (user) => (
+    <Menu>
+      <Menu.Item>
+        <UserOutlined style={{ fontSize: '18px' }} /> {user.username}
+      </Menu.Item>
+      <Menu.Item>
+        <a rel="noopener noreferrer" href="#!">
+        <UnorderedListOutlined style={{ fontSize: '18px' }} /> Encoded SAC Forms
+        </a>
+      </Menu.Item>
+      <Menu.Item>
+        <a rel="noopener noreferrer" href="#!">
+        <QuestionCircleOutlined style={{ fontSize: '18px' }} /> Quick Encoding Guidelines
+        </a>
+      </Menu.Item>
+      <Menu.Item>
+        <a onClick={() => { logout() }}>
+        <PoweroffOutlined /> Logout
+        </a>
+      </Menu.Item>
+    </Menu>
+  );
+
+  const logout = () => {
+    API.User.logout()
+    .then(res => {
+      props.dispatch({
+        type: "SET_INITIAL_STATE",
+        data: {}
+      });
+      ls.remove('auth');
+      Router.push('/login')
+    })
+    .catch(res => {})
+    .then(res => {})
+    ;
+  }
+
+  const gotoIndex = () => {
+    Router.push('/')
+  }
+
+  return (
+    <div>
+      <div className="h-auto">
+        <div className="container">
+          <div>
+            &nbsp;
+            <div className="float-left">
+              <b className="text-lg">
+                <a href="#!" style={{textDecoration:"none",color:"inherit"}} onClick={() => {gotoIndex()}}>Social Amelioration Information System</a>
+              </b>
+            </div>
+            <div className="float-right space-x-4">
+
+              <Dropdown overlay={menu(user)} trigger={['click']} placement="bottomRight">
+                <a className="px-1 "><MenuIcon icon={<CaretDownOutlined />} label="Menu" /></a>
+              </Dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default connect(
+  mapStateToProps,
+)(Headers);

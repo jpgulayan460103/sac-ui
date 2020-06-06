@@ -17,6 +17,7 @@ import HmemberForm from './HmemberForm'
 
 const { Title } = Typography;
 const { Option } = Select;
+const { TextArea } = Input;
 
 
 function mapStateToProps(state) {
@@ -239,10 +240,12 @@ const HheadForm = (props) => {
     })
     .catch(err => {
       setSubmit(false);
-      props.dispatch({
-        type: "HHEAD_FORM_ERROR",
-        data: err.response.data.errors
-      })
+      if(err.response){
+        props.dispatch({
+          type: "HHEAD_FORM_ERROR",
+          data: err.response.data.errors
+        })
+      }
     })
     .then(res => {
       setSubmit(false);
@@ -338,21 +341,21 @@ const HheadForm = (props) => {
   return (
     <div>
       <Form disabled={props.viewStatus == "view"} ref={formRef} name="basic" onValuesChange={setFormFields} onFinish={formSubmit} size="small" >
-      <Title level={2} style={{textAlign: "center"}}>Household Head</Title>
+      <Title level={2} style={{textAlign: "center"}}>Social Amelioration Card (SAC)</Title>
         <Input.Group compact>
-          <Form.Item  style={{ width: '20%' }} label="Last Name" name="last_name" hasFeedback {...displayErrors('last_name')}>
-            <Input autoComplete="off" placeholder="Last Name" />
+          <Form.Item  style={{ width: '20%' }} label="Apelyido" name="last_name" hasFeedback {...displayErrors('last_name')}>
+            <Input autoComplete="off" placeholder="Apelyido" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="First Name" name="first_name" hasFeedback {...displayErrors('first_name')}>
-            <Input autoComplete="off" placeholder="First Name" />
+          <Form.Item  style={{ width: '20%' }} label="Pangalan" name="first_name" hasFeedback {...displayErrors('first_name')}>
+            <Input autoComplete="off" placeholder="Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Middle Name" name="middle_name" hasFeedback {...displayErrors('middle_name')}>
-            <Input autoComplete="off" placeholder="First Name" />
+          <Form.Item  style={{ width: '20%' }} label="Gitnang Pangalan" name="middle_name" hasFeedback {...displayErrors('middle_name')}>
+            <Input autoComplete="off" placeholder="Gitnang Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Ext Name" name="ext_name" hasFeedback {...displayErrors('ext_name')}>
-            <Input autoComplete="off" placeholder="Ext Name" />
+          <Form.Item  style={{ width: '20%' }} label="Ext" name="ext_name" hasFeedback {...displayErrors('ext_name')}>
+            <Input autoComplete="off" placeholder="Ext" />
           </Form.Item>
-          <Form.Item  style={{ width: '19.3%' }} label="Kasarian" name="kasarian" hasFeedback {...displayErrors('kasarian')}>
+          <Form.Item  style={{ width: '19.3%' }} label="Kasarian" name="kasarian" {...displayErrors('kasarian')}>
             <Radio.Group>
               <Radio value={"M"}>
                 Lalaki
@@ -864,7 +867,7 @@ const HheadForm = (props) => {
             </Button>
           </div>
         </div>
-        <Title level={2} style={{textAlign: "center"}}>Household Members</Title>
+        <Title level={2} style={{textAlign: "center"}}>Miyembro ng Pamilya</Title>
       </Form>
       { populateMembers() }
       <Divider />
@@ -884,15 +887,22 @@ const HheadForm = (props) => {
             <Input type="number" autoComplete="off" placeholder="Barcode Number" />
           </Form.Item>
         </Input.Group>
+        <Input.Group compact>
+          <Form.Item  style={{ width: '80%' }} label="Remarks" name="remarks">
+            <TextArea rows={4} placeholder="Remarks" />
+          </Form.Item>
+          <Form.Item  style={{ width: '20%' }}>
+          <div className="d-flex justify-content-center mt-10">
+          { props.viewStatus == "edit" ? (
+            <Button size="large" type="primary" htmlType="submit" form="basic" disabled={submit} loading={submit}>
+              Save Form
+            </Button>
+          ) : "" }
+          </div>
+          </Form.Item>
+        </Input.Group>
       </Form>
       <Divider />
-      <div className="d-flex justify-content-center">
-      { props.viewStatus == "edit" ? (
-        <Button type="primary" htmlType="submit" form="basic" disabled={submit}>
-          Submit
-        </Button>
-      ) : "" }
-      </div>
       <br />
       <br />
       

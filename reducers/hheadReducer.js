@@ -25,53 +25,40 @@ export default function hheadReducer(state = initialState(), action) {
     case 'HHEAD_FORM_SUBMIT':
       state.formError = {};
       return state;
-      break;
     case 'HHEAD_FORM_ERROR':
       return {
         ...state,
         formError: action.data,
       };
-      break;
     case 'SET_HHEAD_FORM_DATA':
       return {
         ...state,
         formData: action.data,
       };
-      break;
     case 'SET_HMEMBER_FORM_DATA':
       return {
         ...state,
         members: action.data,
       };
-      break;
     case 'ADD_HMEMBERS':
       return {
         ...state,
         members: action.data,
       };
-      break;
     case 'SET_HMEMBER_FORM_STATUS':
       return {
         ...state,
         formStatus: action.data,
       };
-      break;
     case 'SET_HHEAD':
       state.selectedHhead = action.data;
       return state;
-      break;
     case 'SET_HHEAD_FORM_STATUS':
       state.formStatus = action.data;
       return state;
-      break;
-    case 'SET_HHEAD_FORM_TYPE':
-      state.formType = action.data;
-      return state;
-      break;
     case 'SET_INITIAL_STATE':
       state = initialState();
-      return state;
-      break;
+      return state
     default:
       return state;
   }

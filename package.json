@@ -30,6 +30,7 @@
     "query-string": "^6.12.1",
     "react": "16.13.0",
     "react-dom": "16.13.0",
+    "react-preloaders": "^3.0.3",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.2.0",
     "reactstrap": "^8.4.1",

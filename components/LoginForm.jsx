@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Form, Input, Button, Checkbox } from 'antd';
 import API from '../api'
 import Router from 'next/router'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import ls from 'local-storage'
 
 function mapStateToProps(state) {
   return {
@@ -12,116 +13,76 @@ function mapStateToProps(state) {
 }
 
 const layout = {
-  labelCol: {
-    span: 8,
-  },
-  wrapperCol: {
-    span: 24,
-  },
+  labelCol: { span: 5 },
+  wrapperCol: { span: 17 },
 };
 const tailLayout = {
-  wrapperCol: {
-    span: 24,
-  },
+  wrapperCol: { offset: 5, span: 17 },
 };
 
-class LoginForm extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      
-    }
-    this.handleTest = this.handleTest.bind(this);
-    this.onFinish = this.onFinish.bind(this);
-    this.onFinishFailed = this.onFinishFailed.bind(this);
-  }
-  handleTest = () => {
-    API.User.getUsers()
-      .then(res => {
-        
-      })
-      .catch(err => {
-
-      })
-      .then(res => {})
-  }
-  onFinish = values => {
-    // console.log('Success:', values);
+const LoginForm = props => {
+  const [submit, setSubmit] = useState(false);
+  const onSubmit = values => {
+    setSubmit(true);
     API.User.login(values)
     .then(res => {
-      this.props.dispatch({
-        type: "USER_LOGIN_SUCCESSFUL",
-        data: res.data
-      });
-      console.log(res.data);
-      
+      setSubmit(false);
+      let user = res.data.user;
+      let createdToken = res.data.createdToken;
+      user.createdToken = createdToken;
+      ls.set('auth',user);
       Router.push('/')
     })
     .catch(err => {
-      this.props.dispatch({
-        type: "USER_LOGIN_FAILED",
-        data: err
-      });
-      Router.push('/login')
+      setSubmit(false);
     })
-    .then(res => {})
-  }
-  onFinishFailed = errorInfo => {
-    // console.log('Failed:', errorInfo);
-  }
-  render() {
-    return (
-      <div className="pt-16">
-        <img src="/images/logo.png" className="h-40 w-40 rounded-full mx-auto" alt=""/>
-        <Form
-          {...layout}
-          name="basic"
-          layout="vertical"
-          initialValues={{
-            remember: true,
-          }}
-          onFinish={this.onFinish}
-          onFinishFailed={this.onFinishFailed}
+    .then(res => {
+      setSubmit(false);
+    })
+  };
+
+  const onFinishFailed = errorInfo => {
+    console.log('Failed:', errorInfo);
+  };
+  return (
+    <div>
+      <Form
+        {...layout}
+        name="basic"
+        initialValues={{ remember: true }}
+        onFinish={onSubmit}
+        onFinishFailed={onFinishFailed}
+      >
+        <Form.Item
+          label="Username"
+          name="username"
+          rules={[{ required: true, message: 'Please input your username!' }]}
         >
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your username!',
-              },
-            ]}
-          >
-            <Input placeholder="Type your username" prefix={<UserOutlined />} />
-          </Form.Item>
+          <Input prefix={<UserOutlined />} />
+        </Form.Item>
 
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your password!',
-              },
-            ]}
-          >
-            <Input.Password placeholder="Type your password" prefix={<LockOutlined />} />
-          </Form.Item>
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: 'Please input your password!' }]}
+        >
+          <Input.Password prefix={<LockOutlined />} />
+        </Form.Item>
 
-          
+        <Form.Item {...tailLayout}>
+          <Button type="primary" htmlType="submit" disabled={submit} loading={submit}>
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
+  );
+};
 
-          <Form.Item {...tailLayout}>
-            <Button type="primary" htmlType="submit" size="large" block>
-              Login
-            </Button>
-          </Form.Item>
+LoginForm.propTypes = {
+  
+};
 
-        </Form>
-      </div>
-    );
-  }
-}
 
 export default connect(
   mapStateToProps,
