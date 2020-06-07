@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 function mapStateToProps(state) {
@@ -7,7 +7,10 @@ function mapStateToProps(state) {
   };
 }
 const handleClick = () => {}
-const Resident = (props) => {
+const Index = (props) => {
+  useEffect(() => {
+    
+  }, []);
   return (
     <div>
       
@@ -19,4 +22,4 @@ const Resident = (props) => {
 
 export default connect(
   mapStateToProps,
-)(Resident);
+)(Index);

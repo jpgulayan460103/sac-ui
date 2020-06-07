@@ -4,6 +4,7 @@ import { Form, Input, Select, DatePicker } from 'antd';
 import _forEach from 'lodash/forEach'
 import _isEmpty from 'lodash/isEmpty'
 import _debounce from 'lodash/debounce'
+import _cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment';
 
 const { Option } = Select;
@@ -14,12 +15,13 @@ function mapStateToProps(state) {
     formData: state.hhead.formData,
     members: state.hhead.members,
     formStatus: state.hhead.formStatus,
+    formType: state.hhead.formType,
   };
 }
 
 
 const HmemberForm = (props) => {
-  const formRef = React.useRef();
+  const memberFormRef = React.useRef();
   const [formData, setFormData] = useState({});
   const displayErrors = (field) => {
     if(props.formError[`members.${props.memberIndex}.${field}`]){
@@ -30,16 +32,28 @@ const HmemberForm = (props) => {
     }
   }
   useEffect(() => {
-    formRef.current.setFieldsValue({
-      ...props.members[props.memberIndex]
-    });
-    setFormData(props.members[props.memberIndex]);
-  }, [props.members]);
+    if(props.viewStatus == "edit"){
+      let clonedMemberData = _cloneDeep(props.members[props.memberIndex]);
+      memberFormRef.current.setFieldsValue({
+        ...clonedMemberData
+      });
+      setFormData(clonedMemberData);
+    }
+  }, [props.members[props.memberIndex]]);
+  useEffect(() => {
+    if(props.viewStatus == "view" || props.formType == "edit"){
+      let viewMemberData = _cloneDeep(props.viewData);
+      memberFormRef.current.setFieldsValue({
+        ...viewMemberData
+      });
+      setFormData(viewMemberData);
+    }
+  }, [props.viewData]);
   useEffect(() => {
     resetForm();
   }, [props.formStatus]);
   const resetForm = () => {
-    formRef.current.resetFields();
+    memberFormRef.current.resetFields();
   }
   const getAge = (dateString) => {
     var today = new Date();
@@ -52,6 +66,9 @@ const HmemberForm = (props) => {
     return age;
   }
   const setFormFields = (e) => {
+    if(props.viewStatus == "view"){
+      return false;
+    }
     let transformedValue = {};
     _forEach(e, function(value, key) {
       transformedValue['type'] = 'old';
@@ -118,7 +135,7 @@ const HmemberForm = (props) => {
   }
   return (
     <React.Fragment>
-      <Form ref={formRef} name="basic" onValuesChange={setFormFields} size="small" >
+      <Form ref={memberFormRef} name="basic" onValuesChange={setFormFields} size="small" >
       <Input.Group compact>
           <Form.Item  style={{ width: '10%' }} label={diplayLabel("Apelyido",props.memberIndex)} name="last_name" {...displayErrors('last_name')}>
             <Input autoComplete="off" placeholder="Apelyido" />
@@ -165,9 +182,9 @@ const HmemberForm = (props) => {
             <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}}>
               <option value="">Sektor</option>
               <option value="W - Wala sa pagpipilian">W - Wala sa pagpipilian</option>
-              { (typeof formData.age != undefined && formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
-              { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>}
-              { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>}
+              {/* { (typeof formData.age != undefined && formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>} */}
+              {/* { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>} */}
+              {/* { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>} */}
               <option value="D - PWD">D - PWD</option>
               <option value="E - Solo Parent">E - Solo Parent</option>
               <option value="F - Walang Tirahan">F - Walang Tirahan</option>

@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import Router from 'next/router'
 import ls from 'local-storage'
 
-const DefaultComponent = () => {
+const AuthChecker = () => {
   useEffect(() => {
     let user = ls('auth');
     if(!user){
@@ -10,12 +10,8 @@ const DefaultComponent = () => {
     }
   }, []);
   return (
-    <div>
-      <div style={{height:"100vw",zIndex: "1000000000"}}>
-
-      </div>
-    </div>
+    <React.Fragment></React.Fragment>
   );
 };
 
-export default DefaultComponent;
+export default AuthChecker;

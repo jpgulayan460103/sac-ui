@@ -53,9 +53,11 @@ export default function hheadReducer(state = initialState(), action) {
     case 'SET_HHEAD':
       state.selectedHhead = action.data;
       return state;
-    case 'SET_HHEAD_FORM_STATUS':
-      state.formStatus = action.data;
-      return state;
+    case 'SET_HHEAD_FORM_TYPE':
+      return {
+        ...state,
+        formType: action.data
+      }
     case 'SET_INITIAL_STATE':
       state = initialState();
       return state

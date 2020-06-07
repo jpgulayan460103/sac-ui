@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Headers from '../components/Headers'
-import DefaultComponent from '../components/DefaultComponent'
+import AuthChecker from '../components/AuthChecker'
 import Menus from '../components/Menus'
 import { Provider } from 'react-redux'
 import { Layout, BackTop  } from "antd";
@@ -10,6 +10,7 @@ import store from '../store'
 const Layouts = ({children}) => {
   return (
     <Provider store={store}>
+      <AuthChecker />
       <Headers />
       <div className="main-layout-container">
         <div className="container">

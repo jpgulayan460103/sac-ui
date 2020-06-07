@@ -46,20 +46,20 @@ const Headers = (props) => {
   const menu = (user) => (
     <Menu>
       <Menu.Item>
-        <UserOutlined style={{ fontSize: '18px' }} /> {user.username}
+        <UserOutlined style={{ fontSize: '18px' }} /> { (user ? user.username : "") }
       </Menu.Item>
       <Menu.Item>
-        <a rel="noopener noreferrer" href="#!">
+        <a rel="noopener noreferrer" onClick={() => { Router.push('/beneficiaries') }}>
         <UnorderedListOutlined style={{ fontSize: '18px' }} /> Encoded SAC Forms
         </a>
       </Menu.Item>
       <Menu.Item>
-        <a rel="noopener noreferrer" href="#!">
+        <a rel="noopener noreferrer">
         <QuestionCircleOutlined style={{ fontSize: '18px' }} /> Quick Encoding Guidelines
         </a>
       </Menu.Item>
       <Menu.Item>
-        <a onClick={() => { logout() }}>
+        <a rel="noopener noreferrer" onClick={() => { logout() }}>
         <PoweroffOutlined /> Logout
         </a>
       </Menu.Item>
@@ -81,10 +81,6 @@ const Headers = (props) => {
     ;
   }
 
-  const gotoIndex = () => {
-    Router.push('/')
-  }
-
   return (
     <div>
       <div className="h-auto">
@@ -93,7 +89,7 @@ const Headers = (props) => {
             &nbsp;
             <div className="float-left">
               <b className="text-lg">
-                <a href="#!" style={{textDecoration:"none",color:"inherit"}} onClick={() => {gotoIndex()}}>Social Amelioration Information System</a>
+                <a style={{textDecoration:"none",color:"inherit"}} onClick={() => {Router.push('/')}}>Social Amelioration Information System</a>
               </b>
             </div>
             <div className="float-right space-x-4">

@@ -5,7 +5,7 @@ import _cloneDeep from 'lodash/cloneDeep'
 
 export default {
   
-  save(formData, members){
+  save(formData, members, formType){
     let clonedMembers = _cloneDeep(members)
     let clonedFormData = _cloneDeep(formData)
     clonedFormData.kapanganakan = clonedFormData.kapanganakan ? moment(clonedFormData.kapanganakan).format("MM/DD/YYYY") : clonedFormData.kapanganakan;
@@ -18,16 +18,24 @@ export default {
       clonedMembers[key].kapanganakan = clonedMembers[key].kapanganakan ? moment(clonedMembers[key].kapanganakan).format("MM/DD/YYYY") : clonedMembers[key].kapanganakan;
     });
     clonedFormData.members = clonedMembers;
-    return axios.post(`api/household-heads`,clonedFormData);
+    if(formType == "edit"){
+      return this.update(clonedFormData, clonedFormData.id)
+    }else{
+      return this.create(clonedFormData)
+    }
+  },
+
+  create(formData){
+    return axios.post(`api/household-heads`,formData);
   },
   update(formData,id){
-    return axios.put(`api/barangay-officials/${id}`,formData);
+    return axios.put(`api/household-heads/${id}`,formData);
   },
   delete(id){
     return axios.delete(`api/barangay-officials/${id}`);
   },
   all(formData){
-    return axios.get(`api/barangay-officials`,{
+    return axios.get(`api/household-heads`,{
       params: formData
     });
   },

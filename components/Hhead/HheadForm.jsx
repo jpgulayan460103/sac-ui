@@ -26,6 +26,7 @@ function mapStateToProps(state) {
     formError: state.hhead.formError,
     members: state.hhead.members,
     formStatus: state.hhead.formStatus,
+    formType: state.hhead.formType,
   };
 }
 const handleClick = () => {}
@@ -60,14 +61,31 @@ const HheadForm = (props) => {
   }, [props.formData]);
   useEffect(() => {
     if(props.viewStatus == "view"){
+      let clonedHheadData = props.viewData;
+      setCities([{
+        city_name: clonedHheadData.barangay.city_name,
+        city_psgc: clonedHheadData.barangay.city_psgc,
+      }]);
+      setBarangays([{
+        barangay_name: clonedHheadData.barangay.barangay_name,
+        id: clonedHheadData.barangay.id,
+      }]);
+      setMembersCount(clonedHheadData.members.length);
       formRef.current.setFieldsValue({
-        ...props.viewData
+        ...clonedHheadData
       });
       secondFormRef.current.setFieldsValue({
-        ...props.viewData
+        ...clonedHheadData
       });
     }
   }, [props.viewStatus]);
+  useEffect(() => {
+    if(props.formType == "edit"){
+      let clonedHheadData = props.formData;
+      getCities(clonedHheadData.barangay.province_psgc)
+      getBarangays(clonedHheadData.barangay.city_psgc)
+    }
+  }, [props.formType]);
   useEffect(() => {
     getProvinces();
   }, []);
@@ -122,7 +140,7 @@ const HheadForm = (props) => {
   const populateBarangays = () => {
     let items = [];
     barangays.map(item => {
-      items.push(<Option value={item.barangay_psgc} key={item.barangay_psgc}>{item.barangay_name}</Option>);
+      items.push(<Option value={item.id} key={item.id}>{item.barangay_name}</Option>);
     })
     return items;
   }
@@ -131,6 +149,9 @@ const HheadForm = (props) => {
     return str.length < max ? pad("0" + str, max) : str;
   }
   const setFormFields = (e) => {
+    if(props.viewStatus == "view"){
+      return false;
+    }
     props.dispatch({
       type: "SET_HMEMBER_FORM_STATUS",
       data: "old"
@@ -195,13 +216,13 @@ const HheadForm = (props) => {
     setSubmit(true);
     let formData = props.formData;
     let members = props.members;
-    API.Hhead.save(formData, members)
+    API.Hhead.save(formData, members, props.formType)
     .then(res => {
       setSubmit(false);
       let newForm = {};
       newForm.probinsya = props.formData.probinsya;
       newForm.lungsod = props.formData.lungsod;
-      newForm.barangay = props.formData.barangay;
+      newForm.barangay_id = props.formData.barangay_id;
       newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
       newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
       newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
@@ -227,7 +248,11 @@ const HheadForm = (props) => {
             }
           }
         })
-      } 
+      }
+      props.dispatch({
+        type: "SET_HHEAD_FORM_TYPE",
+        data: "create"
+      });
       props.dispatch({
         type: "SET_HMEMBER_FORM_STATUS",
         data: "new"
@@ -306,10 +331,18 @@ const HheadForm = (props) => {
 
   const populateMembers = () => {
     let items = [];
-    for (let index = 0; index < membersCount; index++) {
-      items.push(<HmemberForm memberIndex={index} key={index} />);    
+    let membersObjectCount = Object.keys(props.members).length;
+    for (let index = 0; index < membersObjectCount; index++) {
+      let memberData = {};
+      if(props.viewStatus == "view"){
+        memberData = _cloneDeep(props.viewData.members[index]);
+      }
+      if(props.formType == "edit"){
+        memberData = _cloneDeep(props.members[index]);
+      }
+      items.push(<HmemberForm memberIndex={index} key={index} viewData={ memberData } viewStatus={props.viewStatus} />);    
     }
-    if(membersCount == 0){
+    if(props.members == 0){
       return (
         <Input.Group compact>
           <Form.Item  style={{ width: '10%' }} label="Last Name">
@@ -397,24 +430,24 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Probinsya" name="probinsya" {...displayErrors('probinsya')}>
-          <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={props.formData.lungsod && props.formData.lungsod != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-            { populateProvinces() }
-          </Select>
+            <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={props.formData.lungsod && props.formData.lungsod != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              { populateProvinces() }
+            </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Lungsod/Bayan" name="lungsod" {...displayErrors('lungsod')}>
-            <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={props.formData.barangay && props.formData.barangay != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-              { populateCities() }
-            </Select>
+              <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={props.formData.barangay_id && props.formData.barangay_id != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+                { populateCities() }
+              </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Numero ng ID" name="numero_ng_id" hasFeedback {...displayErrors('numero_ng_id')}>
             <Input autoComplete="off" placeholder="Numero ng ID" />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay" {...displayErrors('barangay')}>
-          <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-              { populateBarangays() }
-            </Select>
+          <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay_id" {...displayErrors('barangay_id')}>
+              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+                { populateBarangays() }
+              </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')}>
             <Input autoComplete="off" placeholder="Rehiyon" value="XI" disabled/>
@@ -857,7 +890,8 @@ const HheadForm = (props) => {
             </Form.Item>
         </Input.Group>
         <Divider />
-        <div style={{position: "absolute", width: "96%"}}>
+        { props.viewStatus == "edit" && props.formType == "create" ? (
+          <div style={{position: "absolute", width: "96%"}}>
           <div style={{paddingTop: "5px"}} className="float-right">
             <Button type="primary" onClick={() => addMember()}>
               Add Member
@@ -867,6 +901,7 @@ const HheadForm = (props) => {
             </Button>
           </div>
         </div>
+        ) : ""}
         <Title level={2} style={{textAlign: "center"}}>Miyembro ng Pamilya</Title>
       </Form>
       { populateMembers() }

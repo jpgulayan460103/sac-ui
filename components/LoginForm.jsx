@@ -31,7 +31,8 @@ const LoginForm = props => {
       let createdToken = res.data.createdToken;
       user.createdToken = createdToken;
       ls.set('auth',user);
-      Router.push('/')
+      location.reload("/");
+      // Router.push('/')
     })
     .catch(err => {
       setSubmit(false);

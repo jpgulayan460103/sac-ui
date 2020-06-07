@@ -20,7 +20,7 @@ if(ls('auth')){
         confirmButtonText: 'Click to Login',
         onClose: () => {
           ls.remove('auth')
-          Router.push('/')
+          Router.push('/login')
         }
       })
     }else if (error.response && error.response.status == 403) {

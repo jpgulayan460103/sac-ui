@@ -2,7 +2,7 @@ import Head from 'next/head'
 import React, { Component } from 'react';
 import { Provider } from 'react-redux'
 import Layouts from './../layouts/layouts'
-import HheadForm from '../components/Hhead/HheadForm'
+import HheadTable from '../components/Hhead/HheadTable'
 import store from '../store'
 
 
@@ -13,7 +13,7 @@ const index = () => {
         <title>Dashboard</title>
       </Head>
       <Layouts>
-        <HheadForm viewStatus="edit" />
+        <HheadTable />
       </Layouts>
     </Provider>
   );
