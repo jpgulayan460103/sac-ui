@@ -55,12 +55,12 @@ const Headers = (props) => {
       </Menu.Item>
       <Menu.Item>
         <a rel="noopener noreferrer">
-        <QuestionCircleOutlined style={{ fontSize: '18px' }} /> Quick Encoding Guidelines
+        <QuestionCircleOutlined style={{ fontSize: '18px' }} /> Encoding Guidelines
         </a>
       </Menu.Item>
       <Menu.Item>
         <a rel="noopener noreferrer" onClick={() => { logout() }}>
-        <PoweroffOutlined /> Logout
+        <PoweroffOutlined style={{ fontSize: '18px' }} /> Logout
         </a>
       </Menu.Item>
     </Menu>

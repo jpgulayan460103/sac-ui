@@ -5,6 +5,7 @@ import API from '../api'
 import Router from 'next/router'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import ls from 'local-storage'
+import Swal from 'sweetalert2/dist/sweetalert2.js'
 
 function mapStateToProps(state) {
   return {
@@ -13,29 +14,36 @@ function mapStateToProps(state) {
 }
 
 const layout = {
-  labelCol: { span: 5 },
-  wrapperCol: { span: 17 },
+  labelCol: { span: 6 },
+  wrapperCol: { span: 18 },
 };
 const tailLayout = {
   wrapperCol: { offset: 5, span: 17 },
 };
 
 const LoginForm = props => {
+  const formRef = React.useRef();
   const [submit, setSubmit] = useState(false);
-  const [formError, setFormError] = useState(false);
+  const [formError, setFormError] = useState({});
   const onSubmit = values => {
     setSubmit(true);
-    API.User.login(values)
+    API.User.save(values)
     .then(res => {
       setSubmit(false);
-      let user = res.data.user;
-      let createdToken = res.data.createdToken;
-      user.createdToken = createdToken;
-      ls.set('auth',user);
-      location.reload("/");
+      setFormError({});
+      formRef.current.resetFields();
+      Swal.fire({
+        title: 'Registration success',
+        text: 'Please contact administrator to activate your account.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        onClose: () => {
+
+        }
+      })
     })
     .catch(err => {
-      setFormError(err.response.data);
+      setFormError(err.response.data.errors);
       setSubmit(false);
     })
     .then(res => {
@@ -47,11 +55,11 @@ const LoginForm = props => {
     console.log('Failed:', errorInfo);
   };
 
-  const displayErrors = () => {
-    if(formError){
+  const displayErrors = (field) => {
+    if(formError[field]){
       return {
         validateStatus: 'error',
-        help: formError.message
+        help: formError[field][0]
       }
     }
   }
@@ -59,6 +67,7 @@ const LoginForm = props => {
     <div>
       <Form
         {...layout}
+        ref={formRef}
         name="basic"
         initialValues={{ remember: true }}
         onFinish={onSubmit}
@@ -67,15 +76,35 @@ const LoginForm = props => {
         <Form.Item
           label="Username"
           name="username"
-          {...displayErrors()}
+          {...displayErrors('username')}
           rules={[{ required: true, message: 'Please input your username!' }]}
         >
           <Input prefix={<UserOutlined />} />
         </Form.Item>
 
         <Form.Item
+          label="Name"
+          name="name"
+          {...displayErrors('name')}
+          rules={[{ required: true, message: 'Please input your name!' }]}
+        >
+          <Input prefix={<UserOutlined />} />
+        </Form.Item>
+
+
+        <Form.Item
           label="Password"
           name="password"
+          {...displayErrors('password')}
+          rules={[{ required: true, message: 'Please input your password!' }]}
+        >
+          <Input.Password prefix={<LockOutlined />} />
+        </Form.Item>
+
+        <Form.Item
+          label="Confirm Password"
+          name="password_confirmation"
+          {...displayErrors('password_confirmation')}
           rules={[{ required: true, message: 'Please input your password!' }]}
         >
           <Input.Password prefix={<LockOutlined />} />

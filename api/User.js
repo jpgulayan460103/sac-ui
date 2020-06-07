@@ -4,6 +4,9 @@ export default {
   login(formdata){
     return axios.post(`api/login`,formdata);
   },
+  save(formdata){
+    return axios.post(`api/users`,formdata);
+  },
   getUsers(){
     return axios.get(`api/users`);
   },

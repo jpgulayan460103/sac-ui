@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import React, { useEffect } from 'react';
 import LoginForm from '../components/LoginForm'
+import RegistrationForm from '../components/RegistrationForm'
 import { Provider } from 'react-redux'
 import store from '../store'
 import Layouts from './../layouts/layouts'
@@ -35,7 +36,7 @@ const login = (props) => {
             </div>
             <div className="col-6">
             <Title level={3} style={{textAlign:"center"}}>Registration Form</Title>
-            <LoginForm />
+            <RegistrationForm />
             </div>
           </div>
         </div>
