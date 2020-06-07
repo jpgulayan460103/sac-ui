@@ -13,4 +13,7 @@ export default {
   logout(){
     return axios.post(`api/logout`);
   },
+  toggleUser(user){
+    return axios.post(`api/users/active-status/${user.id}`);
+  },
 }
