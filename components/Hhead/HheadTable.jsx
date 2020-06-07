@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import API from '../../api'
-import { Typography, Table, Drawer } from 'antd';
+import { Typography, Table, Drawer, Button } from 'antd';
 import HheadForm from './HheadForm'
 import _cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment'
@@ -18,8 +18,13 @@ const handleClick = () => {}
 const HheadTable = (props) => {
   const [hheads, setHheads] = useState([]);
   const [selectedHhead, setSelectedHhead] = useState({});
+  const [drawerTitle, setDrawerTitle] = useState("");
   useEffect(() => {
     getHouseholdHeads();
+    props.dispatch({
+      type: "SET_INITIAL_STATE",
+      data: {}
+    });
   }, []);
 
   const [visible, setVisible] = useState(false);
@@ -73,7 +78,20 @@ const HheadTable = (props) => {
     setSelectedHhead(loadedData);
   }
 
-
+  const pad = (str, max) => {
+    str = str.toString();
+    return str.length < max ? pad("0" + str, max) : str;
+  }
+  const getAge = (dateString) => {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+  }
   const convertToForm = (data) => {
     let clonedHheadData = _cloneDeep(data);
     clonedHheadData.probinsya = clonedHheadData.barangay.province_psgc;
@@ -81,13 +99,18 @@ const HheadTable = (props) => {
     clonedHheadData.bene_uct = clonedHheadData.bene_uct == "Y" ? true : false;
     clonedHheadData.bene_4ps = clonedHheadData.bene_4ps == "Y" ? true : false;
     clonedHheadData.katutubo = clonedHheadData.katutubo == "Y" ? true : false;
+    clonedHheadData.sac_number = pad(parseInt(clonedHheadData.sac_number), 8); ;
     clonedHheadData.bene_others = clonedHheadData.bene_others == "Y" ? true : false;
     clonedHheadData.kapanganakan = moment.parseZone(clonedHheadData.kapanganakan).utc();
     clonedHheadData.petsa_ng_pagrehistro = moment.parseZone(clonedHheadData.petsa_ng_pagrehistro).utc();
-    clonedHheadData.members.map(member => {
+    clonedHheadData.age = getAge(clonedHheadData.kapanganakan.format("YYYY/MM/DD"));
+    setDrawerTitle(clonedHheadData.barcode_number);
+    clonedHheadData.members.data.map(member => {
       member.kapanganakan = moment.parseZone(member.kapanganakan).utc();
+      member.age = getAge(member.kapanganakan.format("YYYY/MM/DD"));
       return member; 
     })
+    clonedHheadData.members = clonedHheadData.members.data;
     return clonedHheadData;
   }
 
@@ -96,32 +119,43 @@ const HheadTable = (props) => {
   
   const columns = [
     {
-      title: 'First Name',
-      dataIndex: 'first_name',
-      key: 'first_name',
+      title: 'Barcode',
+      key: 'barcode_number',
+      dataIndex: 'barcode_number',
     },
     {
-      title: 'Middle Name',
-      dataIndex: 'middle_name',
-      key: 'middle_name',
-    },
-    {
-      title: 'View',
-      key: 'view',
-      dataIndex: 'view',
+      title: 'Name',
+      key: 'full_name',
       render: (text, record) => (
         <>
-          <span onClick={() => { showHhead(record) }} key={record.id}>view</span>
+          <span key={record.id}>
+            <span>{record.last_name}, {record.first_name} {record.middle_name} {record.ext_name}</span>
+          </span>
         </>
       ),
     },
     {
-      title: 'Tags',
-      key: 'edit',
-      dataIndex: 'edit',
+      title: 'Address',
+      key: 'address',
       render: (text, record) => (
         <>
-          <span onClick={() => { editHhead(record) }} key={record.id}>edit</span>
+          <span key={record.id}>
+            <span>{record.barangay.barangay_name}, {record.barangay.city_name} {record.barangay.province_name}</span>
+          </span>
+        </>
+      ),
+    },
+    {
+      title: '',
+      key: 'action',
+      dataIndex: 'action',
+      align: "right",
+      render: (text, record) => (
+        <>
+          <Button onClick={() => { showHhead(record) }} key={`view-${record.id}`}>View</Button>
+          <Button onClick={() => { editHhead(record) }} key={`edit-${record.id}`}>Edit</Button>
+          { record.allow_delete ? (<Button type="danger" onClick={() => { deleteHhead(record) }} key={`delete-${record.id}`}>Delete</Button>) : "" }
+          
         </>
       ),
     },
@@ -134,9 +168,9 @@ const HheadTable = (props) => {
       <Table dataSource={dataSource} columns={columns} />
 
       <Drawer
-        title="Basic Drawer"
+        title={drawerTitle}
         width={900}
-        placement="right"
+        placement="left"
         closable={false}
         onClose={onClose}
         visible={visible}

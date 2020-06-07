@@ -49,6 +49,7 @@ const HheadForm = (props) => {
   const [barangays, setBarangays] = useState([]);
   const formRef = React.useRef();
   const secondFormRef = React.useRef();
+  const isMountedRef = React.useRef(null);
   useEffect(() => {
     if(props.viewStatus == "edit"){
       formRef.current.setFieldsValue({
@@ -78,12 +79,22 @@ const HheadForm = (props) => {
         ...clonedHheadData
       });
     }
-  }, [props.viewStatus]);
+  }, [props.viewData]);
   useEffect(() => {
     if(props.formType == "edit"){
+      isMountedRef.current = true;
       let clonedHheadData = props.formData;
-      getCities(clonedHheadData.barangay.province_psgc)
-      getBarangays(clonedHheadData.barangay.city_psgc)
+      // getCities(clonedHheadData.barangay.province_psgc)
+      // getBarangays(clonedHheadData.barangay.city_psgc)
+
+      setCities([{
+        city_name: clonedHheadData.barangay.city_name,
+        city_psgc: clonedHheadData.barangay.city_psgc,
+      }]);
+      setBarangays([{
+        barangay_name: clonedHheadData.barangay.barangay_name,
+        id: clonedHheadData.barangay.id,
+      }]);
     }
   }, [props.formType]);
   useEffect(() => {
@@ -121,6 +132,13 @@ const HheadForm = (props) => {
     })
     .then(res => {})
     ;;
+  }
+
+  const clearBarangaySelection = () =>{
+    if(props.formType=="edit"){
+      getCities(props.formData.barangay.province_psgc)
+      getBarangays(props.formData.barangay.city_psgc)
+    }
   }
 
   const populateProvinces = () => {
@@ -174,7 +192,17 @@ const HheadForm = (props) => {
         transformedValue[key] = value;
       }
       if(key == "sac_number"){
-        transformedValue[key] = pad(parseInt(value), 8); ;
+        value = pad(parseInt(value), 8);
+        transformedValue[key] = value;
+        if(props.formData.lungsod){
+          transformedValue['barcode_number'] = `PH-COVID-${props.formData.lungsod}-${value}`;
+        }
+      }
+      if(key == "lungsod"){
+        transformedValue[key] = value;
+        if(props.formData.sac_number){
+          transformedValue['barcode_number'] = `PH-COVID-${value}-${props.formData.sac_number}`;
+        }
       }
       if(key == "kapanganakan" || key == "petsa_ng_pagrehistro"){
         transformedValue[key] = moment.parseZone(value).utc();
@@ -219,49 +247,8 @@ const HheadForm = (props) => {
     API.Hhead.save(formData, members, props.formType)
     .then(res => {
       setSubmit(false);
-      let newForm = {};
-      newForm.probinsya = props.formData.probinsya;
-      newForm.lungsod = props.formData.lungsod;
-      newForm.barangay_id = props.formData.barangay_id;
-      newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
-      newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
-      newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
-      props.dispatch({
-        type: "SET_HHEAD_FORM_DATA",
-        data: newForm
-      })
-      formRef.current.resetFields();
-      formRef.current.setFieldsValue({
-        ...newForm
-      });
-      secondFormRef.current.resetFields();
-      secondFormRef.current.setFieldsValue({
-        ...newForm
-      });
-      if(membersCount>0){
-        setMembersCount(1);
-        props.dispatch({
-          type: "ADD_HMEMBERS",
-          data: {
-            0:{
-              type: "new",
-            }
-          }
-        })
-      }
-      props.dispatch({
-        type: "SET_HHEAD_FORM_TYPE",
-        data: "create"
-      });
-      props.dispatch({
-        type: "SET_HMEMBER_FORM_STATUS",
-        data: "new"
-      })
-
-      props.dispatch({
-        type: "HHEAD_FORM_ERROR",
-        data: {}
-      })
+      resetForm();
+      
     })
     .catch(err => {
       setSubmit(false);
@@ -277,6 +264,61 @@ const HheadForm = (props) => {
     })
     ;
   }, 250)
+
+  const resetForm = (mode = 'retain') => {
+    let newForm = {};
+    if(mode == "retain"){
+      newForm.probinsya = props.formData.probinsya;
+      newForm.lungsod = props.formData.lungsod;
+      newForm.barangay_id = props.formData.barangay_id;
+      newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
+      newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
+      newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
+    }else{
+      newForm = {
+        bene_uct:false,
+        bene_4ps:false,
+        katutubo:false,
+        bene_others:false,
+      }
+    }
+    props.dispatch({
+      type: "SET_HHEAD_FORM_DATA",
+      data: newForm
+    })
+    formRef.current.resetFields();
+    formRef.current.setFieldsValue({
+      ...newForm
+    });
+    secondFormRef.current.resetFields();
+    secondFormRef.current.setFieldsValue({
+      ...newForm
+    });
+    if(membersCount>0){
+      setMembersCount(1);
+      props.dispatch({
+        type: "ADD_HMEMBERS",
+        data: {
+          0:{
+            type: "new",
+          }
+        }
+      })
+    }
+    props.dispatch({
+      type: "SET_HHEAD_FORM_TYPE",
+      data: "create"
+    });
+    props.dispatch({
+      type: "SET_HMEMBER_FORM_STATUS",
+      data: "new"
+    })
+
+    props.dispatch({
+      type: "HHEAD_FORM_ERROR",
+      data: {}
+    })
+  }
   const displayErrors = (field) => {
     if(props.formError[field]){
       return {
@@ -331,7 +373,12 @@ const HheadForm = (props) => {
 
   const populateMembers = () => {
     let items = [];
-    let membersObjectCount = Object.keys(props.members).length;
+    let membersObjectCount = 0;
+    if(props.viewStatus == "edit"){
+      membersObjectCount = Object.keys(props.members).length;
+    }else{
+      membersObjectCount = props.viewData.members.length;
+    }
     for (let index = 0; index < membersObjectCount; index++) {
       let memberData = {};
       if(props.viewStatus == "view"){
@@ -340,7 +387,7 @@ const HheadForm = (props) => {
       if(props.formType == "edit"){
         memberData = _cloneDeep(props.members[index]);
       }
-      items.push(<HmemberForm memberIndex={index} key={index} viewData={ memberData } viewStatus={props.viewStatus} />);    
+      items.push(<HmemberForm memberIndex={index} key={index} formType={props.formType} viewData={ memberData } viewStatus={props.viewStatus} />);    
     }
     if(props.members == 0){
       return (
@@ -445,7 +492,7 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay_id" {...displayErrors('barangay_id')}>
-              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={() => {clearBarangaySelection()}  }>
                 { populateBarangays() }
               </Select>
           </Form.Item>
@@ -909,17 +956,20 @@ const HheadForm = (props) => {
 
       <Form ref={secondFormRef} name="basic" onValuesChange={setFormFields} onFinish={formSubmit} size="small" >
         <Input.Group compact>
-          <Form.Item  style={{ width: '25%' }} label="Pangalan ng Punong Barangay" name="pangalan_ng_punong_barangay" hasFeedback {...displayErrors('pangalan_ng_punong_barangay')}>
+          <Form.Item  style={{ width: '20%' }} label="Pangalan ng Punong Barangay" name="pangalan_ng_punong_barangay" hasFeedback {...displayErrors('pangalan_ng_punong_barangay')}>
             <Input autoComplete="off" placeholder="Pangalan ng Punong Barangay" />
           </Form.Item>
-          <Form.Item  style={{ width: '25%' }} label="Pangalan ng LSWDO" name="pangalan_ng_lswdo" hasFeedback {...displayErrors('pangalan_ng_lswdo')}>
+          <Form.Item  style={{ width: '20%' }} label="Pangalan ng LSWDO" name="pangalan_ng_lswdo" hasFeedback {...displayErrors('pangalan_ng_lswdo')}>
             <Input autoComplete="off" placeholder="Pangalan ng LSWDO" />
           </Form.Item>
-          <Form.Item  style={{ width: '25%' }} label="Petsa ng Pagrehistro" name="petsa_ng_pagrehistro" hasFeedback {...displayErrors('petsa_ng_pagrehistro')}>
+          <Form.Item  style={{ width: '20%' }} label="Petsa ng Pagrehistro" name="petsa_ng_pagrehistro" hasFeedback {...displayErrors('petsa_ng_pagrehistro')}>
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
           </Form.Item>
-          <Form.Item  style={{ width: '25%' }} label="Barcode Number" name="sac_number" hasFeedback {...displayErrors('sac_number')}>
-            <Input type="number" autoComplete="off" placeholder="Barcode Number" />
+          <Form.Item  style={{ width: '15%' }} label="SAC Number" name="sac_number" hasFeedback {...displayErrors('sac_number')}>
+            <Input type="number" autoComplete="off" placeholder="SAC Number" />
+          </Form.Item>
+          <Form.Item  style={{ width: '25%' }} label="Barcode" name="barcode_number" hasFeedback {...displayErrors('barcode_number')}>
+            <Input autoComplete="off" placeholder="SAC Number" readOnly />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
@@ -929,9 +979,14 @@ const HheadForm = (props) => {
           <Form.Item  style={{ width: '20%' }}>
           <div className="d-flex justify-content-center mt-10">
           { props.viewStatus == "edit" ? (
-            <Button size="large" type="primary" htmlType="submit" form="basic" disabled={submit} loading={submit}>
-              Save Form
-            </Button>
+            <React.Fragment>
+              <Button size="large" type="primary" htmlType="submit" form="basic" disabled={submit} loading={submit}>
+                Save Form
+              </Button>
+              <Button size="large" onClick={() => { resetForm('reset') }}>
+                { props.formType == "edit" ? "Create New" : "Reset Form"}
+              </Button>
+            </React.Fragment>
           ) : "" }
           </div>
           </Form.Item>

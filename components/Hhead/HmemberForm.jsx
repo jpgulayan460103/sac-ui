@@ -15,7 +15,6 @@ function mapStateToProps(state) {
     formData: state.hhead.formData,
     members: state.hhead.members,
     formStatus: state.hhead.formStatus,
-    formType: state.hhead.formType,
   };
 }
 
