@@ -44,5 +44,9 @@ export default {
   },
   get(id){
     return axios.get(`api/barangay-officials/${id}`);
-  }
+  },
+  export(){
+    return axios.post(`api/household-heads/export`);
+  },
+  
 }

@@ -18,6 +18,7 @@ const handleClick = () => {}
 const HheadTable = (props) => {
   const [hheads, setHheads] = useState([]);
   const [selectedHhead, setSelectedHhead] = useState({});
+  const [exporting, setExporting] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("");
   useEffect(() => {
     getHouseholdHeads();
@@ -34,6 +35,17 @@ const HheadTable = (props) => {
   const onClose = () => {
     setVisible(false);
   };
+
+  const exportData = () => {
+    API.Hhead.export()
+    .then(res => {
+      let url = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
+      window.location.href = `${url}files/exported/${res.data.filename}.csv`;
+    })
+    .catch(err => {})
+    .then(res => {})
+    ;
+  }
 
   const getHouseholdHeads = () => {
     API.Hhead.all()
@@ -166,6 +178,9 @@ const HheadTable = (props) => {
     <div>
       <Title level={2} style={{textAlign: "center"}}>Encoded SAC Forms</Title>
       <Table dataSource={dataSource} columns={columns} />
+      <span>
+        <a href="#!" onClick={() => {exportData()}}>Export Data</a>
+      </span>
 
       <Drawer
         title={drawerTitle}
