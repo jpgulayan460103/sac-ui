@@ -40,6 +40,10 @@ const HmemberForm = (props) => {
     }
   }, [props.members[props.memberIndex]]);
   useEffect(() => {
+    let last_name = props.formData.last_name;
+    setFormFields(last_name, 'last_name', true);
+  }, [props.formData.last_name]);
+  useEffect(() => {
     if(props.viewStatus == "view" || props.formType == "edit"){
       let viewMemberData = _cloneDeep(props.viewData);
       memberFormRef.current.setFieldsValue({
@@ -164,6 +168,7 @@ const HmemberForm = (props) => {
     }
     let index = props.memberIndex;
     let memberData = [];
+    transformedValue['type']  = "old";
     memberData[index] = {
         ...props.members[index],
         ...transformedValue
