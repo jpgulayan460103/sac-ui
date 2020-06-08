@@ -246,6 +246,15 @@ const HheadForm = (props) => {
     let members = props.members;
     API.Hhead.save(formData, members, props.formType)
     .then(res => {
+      Swal.fire({
+        title: 'Success!',
+        text: 'Successfully saved the form.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        onClose: () => {
+
+        }
+      })
       setSubmit(false);
       resetForm();
       

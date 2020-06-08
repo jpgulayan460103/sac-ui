@@ -181,9 +181,9 @@ const HmemberForm = (props) => {
             <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}}>
               <option value="">Sektor</option>
               <option value="W - Wala sa pagpipilian">W - Wala sa pagpipilian</option>
-              {/* { (typeof formData.age != undefined && formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>} */}
-              {/* { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>} */}
-              {/* { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>} */}
+              { (typeof formData.age != undefined && formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
+              { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="B - Buntis">B - Buntis</option>}
+              { (typeof formData.kasarian != undefined && formData.kasarian == "M" || formData.age < 8 || formData.age > 55 ) ? "": <option value="C - Nagpapasusong Ina">C - Nagpapasusong Ina</option>}
               <option value="D - PWD">D - PWD</option>
               <option value="E - Solo Parent">E - Solo Parent</option>
               <option value="F - Walang Tirahan">F - Walang Tirahan</option>
