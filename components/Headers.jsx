@@ -49,6 +49,11 @@ const Headers = (props) => {
         <UserOutlined style={{ fontSize: '18px' }} /> { (user ? user.username : "") }
       </Menu.Item>
       <Menu.Item>
+        <a rel="noopener noreferrer" onClick={() => { Router.push('/') }}>
+        <UnorderedListOutlined style={{ fontSize: '18px' }} /> SAC Encoding
+        </a>
+      </Menu.Item>
+      <Menu.Item>
         <a rel="noopener noreferrer" onClick={() => { Router.push('/beneficiaries') }}>
         <UnorderedListOutlined style={{ fontSize: '18px' }} /> Encoded SAC Forms
         </a>
@@ -95,7 +100,7 @@ const Headers = (props) => {
             <div className="float-right space-x-4">
 
               <Dropdown overlay={menu(user)} trigger={['click']} placement="bottomRight">
-                <a className="px-1 "><MenuIcon icon={<CaretDownOutlined />} label="Menu" /></a>
+                <a className="px-1 ">Menu <MenuIcon icon={<CaretDownOutlined />} label="Menu" /></a>
               </Dropdown>
             </div>
           </div>

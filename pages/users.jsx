@@ -10,7 +10,7 @@ const users = () => {
   return (
     <Provider store={store}>
       <Head>
-        <title>Dashboard</title>
+      <title>Users | Social Amelioration Information System</title>
       </Head>
       <Layouts>
         <UserTable />

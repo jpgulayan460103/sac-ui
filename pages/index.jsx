@@ -10,7 +10,7 @@ const index = () => {
   return (
     <Provider store={store}>
       <Head>
-        <title>Dashboard</title>
+        <title>Encoded Beneficiaries | Social Amelioration Information System</title>
       </Head>
       <Layouts>
         <HheadForm viewStatus="edit" />

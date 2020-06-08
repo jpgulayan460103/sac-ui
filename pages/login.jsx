@@ -19,7 +19,7 @@ const login = (props) => {
   return (
     <Provider store={store}>
       <Head>
-        <title>Login</title>
+      <title>Login | Social Amelioration Information System</title>
       </Head>
       <div className="main-layout-container">
         <div className="container" style={{ minHeight: "95vh"}}>

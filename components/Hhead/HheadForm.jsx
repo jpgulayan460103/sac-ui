@@ -343,70 +343,75 @@ const HheadForm = (props) => {
     ;
   }, 250)
 
-  const resetForm = (mode = 'retain') => {
 
+  const resetButton = (mode = 'retain') => {
     confirm({
       title: 'Reset the form and create a new one?',
       icon: <ExclamationCircleOutlined />,
       content: '',
       onOk() {
-        let newForm = {};
-        if(mode == "retain"){
-          newForm.probinsya = props.formData.probinsya;
-          newForm.lungsod = props.formData.lungsod;
-          newForm.barangay_id = props.formData.barangay_id;
-          newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
-          newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
-          newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
-        }else{
-          newForm = {
-            bene_uct:false,
-            bene_4ps:false,
-            katutubo:false,
-            bene_others:false,
-          }
-        }
-        props.dispatch({
-          type: "SET_HHEAD_FORM_DATA",
-          data: newForm
-        })
-        formRef.current.resetFields();
-        formRef.current.setFieldsValue({
-          ...newForm
-        });
-        secondFormRef.current.resetFields();
-        secondFormRef.current.setFieldsValue({
-          ...newForm
-        });
-        if(membersCount>0){
-          setMembersCount(1);
-          props.dispatch({
-            type: "ADD_HMEMBERS",
-            data: {
-              0:{
-                type: "new",
-              }
-            }
-          })
-        }
-        props.dispatch({
-          type: "SET_HHEAD_FORM_TYPE",
-          data: "create"
-        });
-        props.dispatch({
-          type: "SET_HMEMBER_FORM_STATUS",
-          data: "new"
-        })
-    
-        props.dispatch({
-          type: "HHEAD_FORM_ERROR",
-          data: {}
-        })
+        resetForm(mode)
       },
       onCancel() {
-        // console.log('Cancel');
+        
+
+        //end cancel
       },
     });
+  }
+  const resetForm = (mode = 'retain') => {
+    let newForm = {};
+    if(mode == "retain"){
+      newForm.probinsya = props.formData.probinsya;
+      newForm.lungsod = props.formData.lungsod;
+      newForm.barangay_id = props.formData.barangay_id;
+      newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
+      newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
+      newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
+    }else{
+      newForm = {
+        bene_uct:false,
+        bene_4ps:false,
+        katutubo:false,
+        bene_others:false,
+      }
+    }
+    props.dispatch({
+      type: "SET_HHEAD_FORM_DATA",
+      data: newForm
+    })
+    formRef.current.resetFields();
+    formRef.current.setFieldsValue({
+      ...newForm
+    });
+    secondFormRef.current.resetFields();
+    secondFormRef.current.setFieldsValue({
+      ...newForm
+    });
+    if(membersCount>0){
+      setMembersCount(1);
+      props.dispatch({
+        type: "ADD_HMEMBERS",
+        data: {
+          0:{
+            type: "new",
+          }
+        }
+      })
+    }
+    props.dispatch({
+      type: "SET_HHEAD_FORM_TYPE",
+      data: "create"
+    });
+    props.dispatch({
+      type: "SET_HMEMBER_FORM_STATUS",
+      data: "new"
+    })
+
+    props.dispatch({
+      type: "HHEAD_FORM_ERROR",
+      data: {}
+    })
   }
   const displayErrors = (field) => {
     if(props.formError[field]){
@@ -1062,7 +1067,7 @@ const HheadForm = (props) => {
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item  style={{ width: '80%' }} label="Remarks" name="remarks">
+          <Form.Item  style={{ width: '80%' }} label="Remarks" name="remarks" onBlur={(e) => { setFormFields(e,'remarks') }} >
             <TextArea rows={4} placeholder="Remarks" />
           </Form.Item>
           <Form.Item  style={{ width: '20%' }}>
@@ -1072,7 +1077,7 @@ const HheadForm = (props) => {
               <Button size="large" type="primary" htmlType="submit" form="basic" disabled={submit} loading={submit}>
                 Save Form
               </Button>
-              <Button size="large" onClick={() => { resetForm('reset') }}>
+              <Button size="large" onClick={() => { resetButton('reset') }}>
                 { props.formType == "edit" ? "Create New" : "Reset Form"}
               </Button>
             </React.Fragment>

@@ -37,12 +37,12 @@ const HheadTable = (props) => {
   const onClose = () => {
     setVisible(false);
   };
-
+  const FileDownload = require('js-file-download');
   const exportData = () => {
     API.Hhead.export()
     .then(res => {
       let url = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
-      window.location.href = `${url}files/exported/${res.data.filename}.csv`;
+      window.location.href = `${url}${res.data.filename}`;
     })
     .catch(err => {})
     .then(res => {})
@@ -209,10 +209,11 @@ const HheadTable = (props) => {
   return (
     <div>
       <Title level={2} style={{textAlign: "center"}}>Encoded SAC Forms</Title>
-      <Table dataSource={dataSource} columns={columns} />
       <span>
         <a href="#!" onClick={() => {exportData()}}>Export Data</a>
       </span>
+      <Table dataSource={dataSource} columns={columns} />
+      
 
       <Drawer
         title={drawerTitle}
