@@ -2,6 +2,7 @@ import axios from 'axios'
 import ls from 'local-storage'
 import Swal from 'sweetalert2/dist/sweetalert2.js'
 import Router from 'next/router'
+import NProgress from 'nprogress';
 
 
 axios.defaults.baseURL = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
@@ -10,9 +11,11 @@ if(ls('auth')){
   let token = ls('auth').createdToken.access_token;
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
   axios.interceptors.response.use((response) => {
+    NProgress.start();
     return response;
   }, (error) => {
     if (error.response && error.response.status == 401) {
+      NProgress.done();
       Swal.fire({
         title: 'Unauthorized',
         text: 'You are not logged in or the session may have been expired.',
@@ -51,4 +54,11 @@ if(ls('auth')){
     return Promise.reject(error);
   });
 }
+
+axios.interceptors.response.use(function (response) {
+  NProgress.done();
+  return response;
+}, function (error) {
+  return Promise.reject(error);
+});
 export default axios;

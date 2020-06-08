@@ -64,54 +64,104 @@ const HmemberForm = (props) => {
     }
     return age;
   }
-  const setFormFields = (e) => {
+  const setSelectionFields = (e) => {
+    let key = Object.keys(e)[0];
+    let value = e[key];
+    let transformedValue = {};
+    switch (key) {
+      case 'sektor':
+      case 'kondisyon_ng_kalusugan':
+      case 'uri_ng_id':
+      case 'katutubo_name':
+      case 'lungsod':
+      case 'barangay_id':
+      case 'probinsya':
+      case 'bene_uct':
+      case 'bene_4ps':
+      case 'katutubo':
+      case 'bene_others':
+      case 'relasyon_sa_punong_pamilya':
+      case 'kasarian':
+        transformedValue[key] = value;
+        setFormFields(value, key, true);
+        break;
+      default:
+        return false;
+        break;
+    }    
+  }
+  const setSelectionDefault = (e) => {
+    let key = e.target.id;
+    let value = e.target.value;
+    key = key.replace(`member_${props.memberIndex}_`, "")
+    console.log(key);
+    
+    setFormFields(value, key, true);
+  }
+  const setFormFields = (e, field, selectValue = false) => {
     if(props.viewStatus == "view"){
       return false;
     }
     let transformedValue = {};
-    _forEach(e, function(value, key) {
-      transformedValue['type'] = 'old';
-      if(typeof value == "string"){
-        switch (key) {
-          case 'sektor':
-          case 'kondisyon_ng_kalusugan':
-          case 'relasyon_sa_punong_pamilya':
-            transformedValue[key] = value;
-            break;
-          default:
-            transformedValue[key] = value.toUpperCase();
-            break;
+    let value =  selectValue ? e : e.target.value;
+    let key = field;
+    switch (key) {
+      case 'trabaho':
+        value = value.trim() == "" ? "-" : "";
+        break;
+      case 'sektor':
+        value = value.trim() == "" ? "W - Wala sa pagpipilian" : value;
+        break;
+      case 'kondisyon_ng_kalusugan':
+        value = value.trim() == "" ? "0 - Wala sa pagpipilian" : value;
+    
+      default:
+        break;
+    }
+    transformedValue['type'] = 'old';
+    if(typeof value == "string"){
+      switch (key) {
+        case 'sektor':
+        case 'kondisyon_ng_kalusugan':
+        case 'relasyon_sa_punong_pamilya':
+          transformedValue[key] = value;
+          break;
+        default:
+          transformedValue[key] = value.toUpperCase();
+          break;
+      }
+    }else{
+      transformedValue[key] = value;
+    }
+    if(key == "kapanganakan" || key == "petsa_ng_pagrehistro"){
+      if(value == ""){
+        return false;
+      }
+      transformedValue[key] = moment.parseZone(value).utc();
+      if(key == "kapanganakan"){
+        let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
+        transformedValue['age'] = age;
+        if(age < 0){
+          transformedValue[key] = moment().utc();
+          transformedValue['age'] = 0;
+        }else if((age<8 || age>55) && (formData.sektor == "B - Buntis" || formData.sektor == "C - Nagpapasusong Ina")){
+          transformedValue['sektor'] = "";
+        }else if(age<60 && formData.sektor == "A - Nakatatanda"){
+          transformedValue['sektor'] = "";
         }
-      }else{
-        transformedValue[key] = value;
       }
-      if(key == "kapanganakan" || key == "petsa_ng_pagrehistro"){
-        transformedValue[key] = moment.parseZone(value).utc();
-        if(key == "kapanganakan"){
-          let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
-          transformedValue['age'] = age;
-          if(age < 0){
-            transformedValue[key] = moment().utc();
-            transformedValue['age'] = 0;
-          }else if((age<8 || age>55) && (formData.sektor == "B - Buntis" || formData.sektor == "C - Nagpapasusong Ina")){
-            transformedValue['sektor'] = "";
-          }else if(age<60 && formData.sektor == "A - Nakatatanda"){
-            transformedValue['sektor'] = "";
-          }
-        }
+    }
+    if(key == "katutubo" &&  !value){
+      transformedValue['katutubo_name']  = "";
+    }
+    if(key == "bene_others" &&  !value){
+      transformedValue['others_name']  = "";
+    }
+    if(key == "kasarian" && value == "M" ){
+      if(formData.sektor == "B - Buntis" || formData.sektor == "C - Nagpapasusong Ina"){
+        transformedValue['sektor']  = "";
       }
-      if(key == "katutubo" &&  !value){
-        transformedValue['katutubo_name']  = "";
-      }
-      if(key == "bene_others" &&  !value){
-        transformedValue['others_name']  = "";
-      }
-      if(key == "kasarian" && value == "M" ){
-        if(formData.sektor == "B - Buntis" || formData.sektor == "C - Nagpapasusong Ina"){
-          transformedValue['sektor']  = "";
-        }
-      }
-    });
+    }
     let index = props.memberIndex;
     let memberData = [];
     memberData[index] = {
@@ -132,20 +182,24 @@ const HmemberForm = (props) => {
     }
     return "";
   }
+  const test = (e) => {
+    console.log(e.target);
+    
+  }
   return (
     <React.Fragment>
-      <Form ref={memberFormRef} name="basic" onValuesChange={setFormFields} size="small" >
+      <Form ref={memberFormRef} name={`member_${props.memberIndex}`} size="small" onValuesChange={setSelectionFields} >
       <Input.Group compact>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Apelyido",props.memberIndex)} name="last_name" {...displayErrors('last_name')}>
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Apelyido",props.memberIndex)} name="last_name" {...displayErrors('last_name')} onBlur={(e) => { setFormFields(e,'last_name') }} >
             <Input autoComplete="off" placeholder="Apelyido" />
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Pangalan",props.memberIndex)} name="first_name" {...displayErrors('first_name')}>
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Pangalan",props.memberIndex)} name="first_name" {...displayErrors('first_name')} onBlur={(e) => { setFormFields(e,'first_name') }}>
             <Input autoComplete="off" placeholder="Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Gitnang Pangalan",props.memberIndex)} name="middle_name" {...displayErrors('middle_name')}>
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Gitnang Pangalan",props.memberIndex)} name="middle_name" {...displayErrors('middle_name')} onBlur={(e) => { setFormFields(e,'middle_name') }}>
             <Input autoComplete="off" placeholder="Gitnang Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label={diplayLabel("Ext",props.memberIndex)} name="ext_name" {...displayErrors('ext_name')}>
+          <Form.Item  style={{ width: '5%' }} label={diplayLabel("Ext",props.memberIndex)} name="ext_name" {...displayErrors('ext_name')} onBlur={(e) => { setFormFields(e,'ext_name') }}>
             <Input autoComplete="off" placeholder="Ext Name" />
           </Form.Item>
           <Form.Item  style={{ width: '13%' }} label={diplayLabel("Relasyon",props.memberIndex)} name="relasyon_sa_punong_pamilya" {...displayErrors('relasyon_sa_punong_pamilya')}>
@@ -161,7 +215,7 @@ const HmemberForm = (props) => {
               <option value="8 - Iba pang Kamag-anak">8 - Iba pang Kamag-anak</option>
             </select>
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Kapanganakan",props.memberIndex)} name="kapanganakan" {...displayErrors('kapanganakan')}>
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Kapanganakan",props.memberIndex)} name="kapanganakan" {...displayErrors('kapanganakan')} onBlur={(e) => { setFormFields(e,'kapanganakan') }}>
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
           </Form.Item>
           <Form.Item  style={{ width: '5%' }} label={diplayLabel("Edad",props.memberIndex)} name="age">
@@ -174,11 +228,11 @@ const HmemberForm = (props) => {
               <option value="F">F</option>
             </select>
           </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Trabaho",props.memberIndex)} name="trabaho" {...displayErrors('trabaho')}>
+          <Form.Item  style={{ width: '10%' }} label={diplayLabel("Trabaho",props.memberIndex)} name="trabaho" {...displayErrors('trabaho')} onBlur={(e) => { setFormFields(e,'trabaho') }}>
             <Input autoComplete="off" placeholder="trabaho" />
           </Form.Item>
           <Form.Item  style={{ width: '9.5%' }} label={diplayLabel("Sektor",props.memberIndex)} name="sektor" {...displayErrors('sektor')}>
-            <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}}>
+            <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}} onBlur={(e) => { setSelectionDefault(e) }}>
               <option value="">Sektor</option>
               <option value="W - Wala sa pagpipilian">W - Wala sa pagpipilian</option>
               { (typeof formData.age != undefined && formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
@@ -190,7 +244,7 @@ const HmemberForm = (props) => {
             </select>
           </Form.Item>
           <Form.Item  style={{ width: '10%' }} label={diplayLabel("Kondisyon ng Kalusugan",props.memberIndex)} name="kondisyon_ng_kalusugan" {...displayErrors('kondisyon_ng_kalusugan')}>
-            <select placeholder="Kondisyon ng Kalusugan" value="" className="form-control form-control-sm" style={{height: "26px"}}>
+            <select placeholder="Kondisyon ng Kalusugan" value="" className="form-control form-control-sm" style={{height: "26px"}} onBlur={(e) => { setSelectionDefault(e) }}>
               <option value="">Kondisyon ng Kalusugan</option>
               <option value="0 - Wala sa pagpipilian">0 - Wala sa pagpipilian</option>
               <option value="1 - Sakit sa Puso">1 - Sakit sa Puso</option>

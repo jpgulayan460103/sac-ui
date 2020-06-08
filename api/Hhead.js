@@ -32,7 +32,7 @@ export default {
     return axios.put(`api/household-heads/${id}`,formData);
   },
   delete(id){
-    return axios.delete(`api/barangay-officials/${id}`);
+    return axios.delete(`api/household-heads/${id}`);
   },
   all(formData){
     return axios.get(`api/household-heads`,{

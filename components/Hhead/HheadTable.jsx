@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import API from '../../api'
-import { Typography, Table, Drawer, Button } from 'antd';
+import { Typography, Table, Drawer, Button, Modal } from 'antd';
 import HheadForm from './HheadForm'
 import _cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment'
 import Router from 'next/router';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 
+const { confirm } = Modal;
 const { Title } = Typography;
 function mapStateToProps(state) {
   return {
@@ -126,6 +128,36 @@ const HheadTable = (props) => {
     return clonedHheadData;
   }
 
+  const deleteHhead = (record, index) => {
+    console.log(index);
+    
+    confirm({
+      title: `Do you want to delete ${record.barcode_number}?`,
+      icon: <ExclamationCircleOutlined />,
+      content: 'This action is irreversible.',
+      onOk() {
+        console.log('OK');
+        API.Hhead.delete(record.id)
+        .then((res) => {
+          handleDelete(record.id);
+        })
+        .catch((err) => {})
+        .then((res) => {})
+        ;
+
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  }
+
+  const handleDelete = (id) => {
+    let dataSource = [...hheads];
+    let newData = dataSource.filter(item => item.id !== id);
+    setHheads(newData);
+  }
+
 
   const dataSource = hheads;
   
@@ -162,11 +194,11 @@ const HheadTable = (props) => {
       key: 'action',
       dataIndex: 'action',
       align: "right",
-      render: (text, record) => (
+      render: (text, record, index) => (
         <>
           <Button onClick={() => { showHhead(record) }} key={`view-${record.id}`}>View</Button>
           <Button onClick={() => { editHhead(record) }} key={`edit-${record.id}`}>Edit</Button>
-          { record.allow_delete ? (<Button type="danger" onClick={() => { deleteHhead(record) }} key={`delete-${record.id}`}>Delete</Button>) : "" }
+          { record.allow_delete ? (<Button type="danger" onClick={() => { deleteHhead(record, index) }} key={`delete-${record.id}`}>Delete</Button>) : "" }
           
         </>
       ),

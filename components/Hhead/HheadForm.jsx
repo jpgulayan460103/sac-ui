@@ -1,7 +1,7 @@
 import React, { useState,useEffect} from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router'
-import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber   } from 'antd';
+import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber, Modal} from 'antd';
 import { ArrowLeftOutlined, SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import API from '../../api'
 import _forEach from 'lodash/forEach'
@@ -15,6 +15,8 @@ import Swal from 'sweetalert2/dist/sweetalert2.js'
 import Router from 'next/router'
 import HmemberForm from './HmemberForm'
 
+
+const { confirm } = Modal;
 const { Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -166,71 +168,131 @@ const HheadForm = (props) => {
     str = str.toString();
     return str.length < max ? pad("0" + str, max) : str;
   }
-  const setFormFields = (e) => {
+
+  const setSelectionFields = (e) => {
+    let key = Object.keys(e)[0];
+    let value = e[key];
+    let transformedValue = {};
+    switch (key) {
+      case 'sektor':
+      case 'kondisyon_ng_kalusugan':
+      case 'uri_ng_id':
+      case 'katutubo_name':
+      case 'lungsod':
+      case 'barangay_id':
+      case 'probinsya':
+      case 'bene_uct':
+      case 'bene_4ps':
+      case 'katutubo':
+      case 'bene_others':
+        transformedValue[key] = value;
+        setFormFields(value, key, true);
+        break;
+      default:
+        return false;
+        break;
+    }    
+  }
+
+  const setSelectionDefault = (e) => {
+    let key = e.target.id;
+    let value = e.target.value;
+    key = key.replace("basic_", "")
+    setFormFields(value, key, true);
+  }
+  const setFormFields = (e, field, selectValue = false) => {
     if(props.viewStatus == "view"){
       return false;
     }
-    props.dispatch({
-      type: "SET_HMEMBER_FORM_STATUS",
-      data: "old"
-    })
+    if(props.formStatus == "new"){
+      props.dispatch({
+        type: "SET_HMEMBER_FORM_STATUS",
+        data: "old"
+      })
+    }
     let transformedValue = {};
-    _forEach(e, function(value, key) {
-      if(typeof value == "string"){
-        switch (key) {
-          case 'sektor':
-          case 'kondisyon_ng_kalusugan':
-          case 'uri_ng_id':
-          case 'katutubo_name':
-            transformedValue[key] = value;
-            break;
-          default:
-            transformedValue[key] = value.toUpperCase();
-            break;
+    let key = field;
+    let value =  selectValue ? e : e.target.value;
+    
+
+    switch (key) {
+      case 'tirahan':
+      case 'kalye':
+      case 'numero_ng_id':
+      case 'trabaho':
+      case 'cellphone_number':
+      case 'pinagtratrabahuhang_lugar':
+        value = value.trim() == "" ? "-" : value;
+        break;
+      case 'buwanang_kita':
+        value = value.trim() == "" ? "0" : value;
+        break;
+      case 'sektor':
+        value = value.trim() == "" ? "W - Wala sa pagpipilian" : value;
+        break;
+      case 'kondisyon_ng_kalusugan':
+        value = value.trim() == "" ? "0 - Wala sa pagpipilian" : value;
+        break;
+      default:
+        break;
+    }
+    if(typeof value == "string"){
+      switch (key) {
+        case 'sektor':
+        case 'kondisyon_ng_kalusugan':
+        case 'uri_ng_id':
+        case 'katutubo_name':
+          transformedValue[key] = value;
+          break;
+        default:
+          transformedValue[key] = value.toUpperCase();
+          break;
+      }
+    }else{
+      transformedValue[key] = value;
+    }
+    if(key == "sac_number"){
+      value = pad(parseInt(value), 8);
+      transformedValue[key] = value;
+      if(props.formData.lungsod){
+        transformedValue['barcode_number'] = `PH-COVID-${props.formData.lungsod}-${value}`;
+      }
+    }
+    if(key == "lungsod"){
+      transformedValue[key] = value;
+      if(props.formData.sac_number){
+        transformedValue['barcode_number'] = `PH-COVID-${value}-${props.formData.sac_number}`;
+      }
+    }
+    if(key == "kapanganakan" || key == "petsa_ng_pagrehistro"){
+      if(value == ""){
+        return false;
+      }
+      transformedValue[key] = moment.parseZone(value).utc();
+      if(key == "kapanganakan"){
+        let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
+        transformedValue['age'] = age;
+        if(age < 0){
+          transformedValue[key] = moment().utc();
+          transformedValue['age'] = 0;
+        }else if((age<8 || age>55) && (props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina")){
+          transformedValue['sektor'] = "";
+        }else if(age<60 && props.formData.sektor == "A - Nakatatanda"){
+          transformedValue['sektor'] = "";
         }
-      }else{
-        transformedValue[key] = value;
       }
-      if(key == "sac_number"){
-        value = pad(parseInt(value), 8);
-        transformedValue[key] = value;
-        if(props.formData.lungsod){
-          transformedValue['barcode_number'] = `PH-COVID-${props.formData.lungsod}-${value}`;
-        }
+    }
+    if(key == "katutubo" &&  !value){
+      transformedValue['katutubo_name']  = "";
+    }
+    if(key == "bene_others" &&  !value){
+      transformedValue['others_name']  = "";
+    }
+    if(key == "kasarian" && value == "M" ){
+      if(props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina"){
+        transformedValue['sektor']  = "";
       }
-      if(key == "lungsod"){
-        transformedValue[key] = value;
-        if(props.formData.sac_number){
-          transformedValue['barcode_number'] = `PH-COVID-${value}-${props.formData.sac_number}`;
-        }
-      }
-      if(key == "kapanganakan" || key == "petsa_ng_pagrehistro"){
-        transformedValue[key] = moment.parseZone(value).utc();
-        if(key == "kapanganakan"){
-          let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
-          transformedValue['age'] = age;
-          if(age < 0){
-            transformedValue[key] = moment().utc();
-            transformedValue['age'] = 0;
-          }else if((age<8 || age>55) && (props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina")){
-            transformedValue['sektor'] = "";
-          }else if(age<60 && props.formData.sektor == "A - Nakatatanda"){
-            transformedValue['sektor'] = "";
-          }
-        }
-      }
-      if(key == "katutubo" &&  !value){
-        transformedValue['katutubo_name']  = "";
-      }
-      if(key == "bene_others" &&  !value){
-        transformedValue['others_name']  = "";
-      }
-      if(key == "kasarian" && value == "M" ){
-        if(props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina"){
-          transformedValue['sektor']  = "";
-        }
-      }
-    });
+    }
     let formData  = props.formData;
     props.dispatch({
       type: "SET_HHEAD_FORM_DATA",
@@ -266,6 +328,13 @@ const HheadForm = (props) => {
           type: "HHEAD_FORM_ERROR",
           data: err.response.data.errors
         })
+
+        Swal.fire({
+          title: 'Oops...',
+          text: 'Data validation failed. Please review the form.',
+          icon: 'error',
+          confirmButtonText: 'Ok',
+        })
       }
     })
     .then(res => {
@@ -275,58 +344,69 @@ const HheadForm = (props) => {
   }, 250)
 
   const resetForm = (mode = 'retain') => {
-    let newForm = {};
-    if(mode == "retain"){
-      newForm.probinsya = props.formData.probinsya;
-      newForm.lungsod = props.formData.lungsod;
-      newForm.barangay_id = props.formData.barangay_id;
-      newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
-      newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
-      newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
-    }else{
-      newForm = {
-        bene_uct:false,
-        bene_4ps:false,
-        katutubo:false,
-        bene_others:false,
-      }
-    }
-    props.dispatch({
-      type: "SET_HHEAD_FORM_DATA",
-      data: newForm
-    })
-    formRef.current.resetFields();
-    formRef.current.setFieldsValue({
-      ...newForm
-    });
-    secondFormRef.current.resetFields();
-    secondFormRef.current.setFieldsValue({
-      ...newForm
-    });
-    if(membersCount>0){
-      setMembersCount(1);
-      props.dispatch({
-        type: "ADD_HMEMBERS",
-        data: {
-          0:{
-            type: "new",
+
+    confirm({
+      title: 'Reset the form and create a new one?',
+      icon: <ExclamationCircleOutlined />,
+      content: '',
+      onOk() {
+        let newForm = {};
+        if(mode == "retain"){
+          newForm.probinsya = props.formData.probinsya;
+          newForm.lungsod = props.formData.lungsod;
+          newForm.barangay_id = props.formData.barangay_id;
+          newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
+          newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
+          newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
+        }else{
+          newForm = {
+            bene_uct:false,
+            bene_4ps:false,
+            katutubo:false,
+            bene_others:false,
           }
         }
-      })
-    }
-    props.dispatch({
-      type: "SET_HHEAD_FORM_TYPE",
-      data: "create"
+        props.dispatch({
+          type: "SET_HHEAD_FORM_DATA",
+          data: newForm
+        })
+        formRef.current.resetFields();
+        formRef.current.setFieldsValue({
+          ...newForm
+        });
+        secondFormRef.current.resetFields();
+        secondFormRef.current.setFieldsValue({
+          ...newForm
+        });
+        if(membersCount>0){
+          setMembersCount(1);
+          props.dispatch({
+            type: "ADD_HMEMBERS",
+            data: {
+              0:{
+                type: "new",
+              }
+            }
+          })
+        }
+        props.dispatch({
+          type: "SET_HHEAD_FORM_TYPE",
+          data: "create"
+        });
+        props.dispatch({
+          type: "SET_HMEMBER_FORM_STATUS",
+          data: "new"
+        })
+    
+        props.dispatch({
+          type: "HHEAD_FORM_ERROR",
+          data: {}
+        })
+      },
+      onCancel() {
+        // console.log('Cancel');
+      },
     });
-    props.dispatch({
-      type: "SET_HMEMBER_FORM_STATUS",
-      data: "new"
-    })
-
-    props.dispatch({
-      type: "HHEAD_FORM_ERROR",
-      data: {}
-    })
   }
   const displayErrors = (field) => {
     if(props.formError[field]){
@@ -429,22 +509,22 @@ const HheadForm = (props) => {
 
   return (
     <div>
-      <Form disabled={props.viewStatus == "view"} ref={formRef} name="basic" onValuesChange={setFormFields} onFinish={formSubmit} size="small" >
+      <Form disabled={props.viewStatus == "view"} ref={formRef} name="basic" onValuesChange={setSelectionFields} onFinish={formSubmit} size="small" >
       <Title level={2} style={{textAlign: "center"}}>Social Amelioration Card (SAC)</Title>
         <Input.Group compact>
-          <Form.Item  style={{ width: '20%' }} label="Apelyido" name="last_name" hasFeedback {...displayErrors('last_name')}>
+          <Form.Item  style={{ width: '20%' }} label="Apelyido" name="last_name" hasFeedback {...displayErrors('last_name')} onBlur={(e) => { setFormFields(e,'last_name') }} >
             <Input autoComplete="off" placeholder="Apelyido" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Pangalan" name="first_name" hasFeedback {...displayErrors('first_name')}>
+          <Form.Item  style={{ width: '20%' }} label="Pangalan" name="first_name" hasFeedback {...displayErrors('first_name')} onBlur={(e) => { setFormFields(e,'first_name') }} >
             <Input autoComplete="off" placeholder="Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Gitnang Pangalan" name="middle_name" hasFeedback {...displayErrors('middle_name')}>
+          <Form.Item  style={{ width: '20%' }} label="Gitnang Pangalan" name="middle_name" hasFeedback {...displayErrors('middle_name')} onBlur={(e) => { setFormFields(e,'middle_name') }} >
             <Input autoComplete="off" placeholder="Gitnang Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Ext" name="ext_name" hasFeedback {...displayErrors('ext_name')}>
+          <Form.Item  style={{ width: '20%' }} label="Ext" name="ext_name" hasFeedback {...displayErrors('ext_name')} onBlur={(e) => { setFormFields(e,'ext_name') }} >
             <Input autoComplete="off" placeholder="Ext" />
           </Form.Item>
-          <Form.Item  style={{ width: '19.3%' }} label="Kasarian" name="kasarian" {...displayErrors('kasarian')}>
+          <Form.Item  style={{ width: '19.3%' }} label="Kasarian" name="kasarian" {...displayErrors('kasarian')} onBlur={(e) => { setFormFields(e,'kasarian') }} >
             <Radio.Group>
               <Radio value={"M"}>
                 Lalaki
@@ -456,10 +536,10 @@ const HheadForm = (props) => {
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item style={{ width: '33%' }} label="Tirahan" name="tirahan" hasFeedback {...displayErrors('tirahan')}>
+          <Form.Item style={{ width: '33%' }} label="Tirahan" name="tirahan" hasFeedback {...displayErrors('tirahan')} onBlur={(e) => { setFormFields(e,'tirahan') }} >
             <Input autoComplete="off" placeholder="Tirahan" />
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Kalye" name="kalye" hasFeedback {...displayErrors('kalye')}>
+          <Form.Item style={{ width: '33%' }} label="Kalye" name="kalye" hasFeedback {...displayErrors('kalye')} onBlur={(e) => { setFormFields(e,'kalye') }} >
             <Input autoComplete="off" placeholder="Kalye" />
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Uri ng ID" name="uri_ng_id" hasFeedback {...displayErrors('uri_ng_id')}>
@@ -495,7 +575,7 @@ const HheadForm = (props) => {
                 { populateCities() }
               </Select>
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Numero ng ID" name="numero_ng_id" hasFeedback {...displayErrors('numero_ng_id')}>
+          <Form.Item style={{ width: '33%' }} label="Numero ng ID" name="numero_ng_id" hasFeedback {...displayErrors('numero_ng_id')} onBlur={(e) => { setFormFields(e,'numero_ng_id') }} >
             <Input autoComplete="off" placeholder="Numero ng ID" />
           </Form.Item>
         </Input.Group>
@@ -505,33 +585,33 @@ const HheadForm = (props) => {
                 { populateBarangays() }
               </Select>
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')}>
+          <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')} onBlur={(e) => { setFormFields(e,'rehiyon') }} >
             <Input autoComplete="off" placeholder="Rehiyon" value="XI" disabled/>
           </Form.Item>
-          <Form.Item style={{ width: '23%' }} label="Petsa ng kapanganakan" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')}>
+          <Form.Item style={{ width: '23%' }} label="Petsa ng kapanganakan" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')} onBlur={(e) => { setFormFields(e,'kapanganakan') }} >
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
           </Form.Item>
-          <Form.Item style={{ width: '10%' }} label="Edad" name="age" hasFeedback {...displayErrors('age')}>
+          <Form.Item style={{ width: '10%' }} label="Edad" name="age" hasFeedback {...displayErrors('age')} onBlur={(e) => { setFormFields(e,'age') }} >
             <Input autoComplete="off" placeholder="Edad" disabled />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item style={{ width: '33%' }} label="Trabaho" name="trabaho" hasFeedback {...displayErrors('trabaho')}>
+          <Form.Item style={{ width: '33%' }} label="Trabaho" name="trabaho" hasFeedback {...displayErrors('trabaho')} onBlur={(e) => { setFormFields(e,'trabaho') }} >
             <Input autoComplete="off" placeholder="Trabaho" />
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Buwanang Kita" name="buwanang_kita" hasFeedback {...displayErrors('buwanang_kita')}>
+          <Form.Item style={{ width: '33%' }} label="Buwanang Kita" name="buwanang_kita" hasFeedback {...displayErrors('buwanang_kita')} onBlur={(e) => { setFormFields(e,'buwanang_kita') }} >
             <InputNumber min={0} autoComplete="off" placeholder="Buwanang Kita" style={{width: "100%"}}/>
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Cellphone No" name="cellphone_number" hasFeedback {...displayErrors('cellphone_number')}>
+          <Form.Item style={{ width: '33%' }} label="Cellphone No" name="cellphone_number" hasFeedback {...displayErrors('cellphone_number')} onBlur={(e) => { setFormFields(e,'cellphone_number') }} >
             <Input autoComplete="off" placeholder="Cellphone No" />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item style={{ width: '33%' }} label="Pinagtratrabahuhan at Lugar" name="pinagtratrabahuhang_lugar" hasFeedback {...displayErrors('pinagtratrabahuhang_lugar')}>
+          <Form.Item style={{ width: '33%' }} label="Pinagtratrabahuhan at Lugar" name="pinagtratrabahuhang_lugar" hasFeedback {...displayErrors('pinagtratrabahuhang_lugar')} onBlur={(e) => { setFormFields(e,'pinagtratrabahuhang_lugar') }} >
             <Input autoComplete="off" placeholder="Pinagtratrabahuhan at Lugar" />
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Sektor" name="sektor" hasFeedback {...displayErrors('sektor')}>
-            <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}}>
+            <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}} onBlur={(e) => {setSelectionDefault(e)}} >
               <option value="">Sektor</option>
               <option value="W - Wala sa pagpipilian">W - Wala sa pagpipilian</option>
               { (props.formData.age < 60) ? "" : <option value="A - Nakatatanda">A - Nakatatanda</option>}
@@ -543,7 +623,7 @@ const HheadForm = (props) => {
             </select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Kondisyon ng Kalusugan" name="kondisyon_ng_kalusugan" hasFeedback {...displayErrors('kondisyon_ng_kalusugan')}>
-            <select placeholder="Kondisyon ng Kalusugan" value="" className="form-control form-control-sm" style={{height: "26px"}}>
+            <select placeholder="Kondisyon ng Kalusugan" value="" className="form-control form-control-sm" style={{height: "26px"}} onBlur={(e) => {setSelectionDefault(e)}} >
               <option value="">Kondisyon ng Kalusugan</option>
               <option value="0 - Wala sa pagpipilian">0 - Wala sa pagpipilian</option>
               <option value="1 - Sakit sa Puso">1 - Sakit sa Puso</option>
@@ -941,7 +1021,7 @@ const HheadForm = (props) => {
           <Form.Item style={{ width: '16.5%', marginLeft: "5px" }} label="" name="bene_others" valuePropName="checked">
             <Checkbox value="Y">Others</Checkbox>
           </Form.Item>
-          <Form.Item style={{ width: '16.3%' }} label="" name="others_name" hasFeedback {...displayErrors('others_name')}>
+          <Form.Item style={{ width: '16.3%' }} label="" name="others_name" hasFeedback {...displayErrors('others_name')} onBlur={(e) => { setFormFields(e,'others_name') }} >
               <Input autoComplete="off" placeholder="Others Name" disabled={!props.formData.bene_others} />
             </Form.Item>
         </Input.Group>
@@ -963,21 +1043,21 @@ const HheadForm = (props) => {
       { populateMembers() }
       <Divider />
 
-      <Form ref={secondFormRef} name="basic" onValuesChange={setFormFields} onFinish={formSubmit} size="small" >
+      <Form ref={secondFormRef} name="basic" onFinish={formSubmit} size="small" >
         <Input.Group compact>
-          <Form.Item  style={{ width: '20%' }} label="Pangalan ng Punong Barangay" name="pangalan_ng_punong_barangay" hasFeedback {...displayErrors('pangalan_ng_punong_barangay')}>
+          <Form.Item  style={{ width: '20%' }} label="Pangalan ng Punong Barangay" name="pangalan_ng_punong_barangay" hasFeedback {...displayErrors('pangalan_ng_punong_barangay')} onBlur={(e) => { setFormFields(e,'pangalan_ng_punong_barangay') }} >
             <Input autoComplete="off" placeholder="Pangalan ng Punong Barangay" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Pangalan ng LSWDO" name="pangalan_ng_lswdo" hasFeedback {...displayErrors('pangalan_ng_lswdo')}>
+          <Form.Item  style={{ width: '20%' }} label="Pangalan ng LSWDO" name="pangalan_ng_lswdo" hasFeedback {...displayErrors('pangalan_ng_lswdo')} onBlur={(e) => { setFormFields(e,'pangalan_ng_lswdo') }} >
             <Input autoComplete="off" placeholder="Pangalan ng LSWDO" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Petsa ng Pagrehistro" name="petsa_ng_pagrehistro" hasFeedback {...displayErrors('petsa_ng_pagrehistro')}>
+          <Form.Item  style={{ width: '20%' }} label="Petsa ng Pagrehistro" name="petsa_ng_pagrehistro" hasFeedback {...displayErrors('petsa_ng_pagrehistro')} onBlur={(e) => { setFormFields(e,'petsa_ng_pagrehistro') }} >
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
           </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="SAC Number" name="sac_number" hasFeedback {...displayErrors('sac_number')}>
+          <Form.Item  style={{ width: '15%' }} label="SAC Number" name="sac_number" hasFeedback {...displayErrors('sac_number')} onBlur={(e) => { setFormFields(e,'sac_number') }} >
             <Input type="number" autoComplete="off" placeholder="SAC Number" />
           </Form.Item>
-          <Form.Item  style={{ width: '25%' }} label="Barcode" name="barcode_number" hasFeedback {...displayErrors('barcode_number')}>
+          <Form.Item  style={{ width: '25%' }} label="Barcode" name="barcode_number" hasFeedback {...displayErrors('barcode_number')} onBlur={(e) => { setFormFields(e,'barcode_number') }} >
             <Input autoComplete="off" placeholder="SAC Number" readOnly />
           </Form.Item>
         </Input.Group>
