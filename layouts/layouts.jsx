@@ -1,16 +1,18 @@
 import Head from 'next/head'
 import Headers from '../components/Headers'
 import AuthChecker from '../components/AuthChecker'
+import EncodingGuidelines from '../components/EncodingGuidelines'
 import Menus from '../components/Menus'
 import { Provider } from 'react-redux'
 import { Layout, BackTop  } from "antd";
 
 
 import store from '../store'
-const Layouts = ({children}) => {
+const Layouts = (props) => {
   return (
     <Provider store={store}>
       <AuthChecker />
+      <EncodingGuidelines />
       <Headers />
       <div className="main-layout-container">
         <div className="container">
@@ -19,11 +21,12 @@ const Layouts = ({children}) => {
           </div>
           <div className="row">
             <div className="col-md-12">
-              {children}
+              {props.children}
             </div>
           </div>
         </div>
       </div>
+      
     </Provider>
   );
 }

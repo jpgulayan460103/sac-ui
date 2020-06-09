@@ -5,6 +5,7 @@ const initialState = () => {
     isLogged: false,
     accessToken: "",
     user: {},
+    guidelineDrawer: false,
   }
 }
 
@@ -23,14 +24,11 @@ export default function userReducer(state = initialState(), action) {
     
   }
   switch (action.type) {
-    case 'USER_LOGIN_SUCCESSFUL':
-      ls.set('user',action.data);
-      state = {
-        isLogged: true,
-        accessToken: action.data.accessToken,
-        user: action.data.user,
+    case 'SHOW_GUIDELINES':
+      return {
+        ...state,
+        guidelineDrawer: action.data
       };
-      return state
     case 'USER_LOGIN_FAILED':
       ls.remove('user')
       state = initialState();

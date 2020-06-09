@@ -43,7 +43,17 @@ const Headers = (props) => {
     setUser(loggedUser);
   }, []);
 
+  const showDrawer = () => {
+    console.log("asdhasdh");
+    
+    props.dispatch({
+      type: "SHOW_GUIDELINES",
+      data: true
+    });
+  };
+
   const menu = (user) => (
+    <React.Fragment>
     <Menu>
       <Menu.Item>
         <UserOutlined style={{ fontSize: '18px' }} /> { (user ? user.username : "") }
@@ -59,7 +69,7 @@ const Headers = (props) => {
         </a>
       </Menu.Item>
       <Menu.Item>
-        <a rel="noopener noreferrer">
+        <a rel="noopener noreferrer"  onClick={() => {showDrawer()}}>
         <QuestionCircleOutlined style={{ fontSize: '18px' }} /> Encoding Guidelines
         </a>
       </Menu.Item>
@@ -69,6 +79,7 @@ const Headers = (props) => {
         </a>
       </Menu.Item>
     </Menu>
+    </React.Fragment>
   );
 
   const logout = () => {

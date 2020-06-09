@@ -208,7 +208,8 @@ const HheadTable = (props) => {
   return (
     <div>
       <Title level={2} style={{textAlign: "center"}}>Encoded SAC Forms</Title>
-      <span>
+      <span className="space-x-1">
+        <span>Total records: {hheads.length}</span>
         <a href="#!" onClick={() => {exportData()}}>Export Data</a>
       </span>
       <Table dataSource={dataSource} columns={columns} />
