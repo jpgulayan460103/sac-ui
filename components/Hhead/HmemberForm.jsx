@@ -111,7 +111,7 @@ const HmemberForm = (props) => {
     let key = field;
     switch (key) {
       case 'trabaho':
-        value = value.trim() == "" ? "-" : "";
+        value = value.trim() == "" ? "-" : value;
         break;
       case 'sektor':
         value = value.trim() == "" ? "W - Wala sa pagpipilian" : value;
