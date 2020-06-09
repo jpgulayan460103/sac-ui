@@ -17,8 +17,8 @@ class MyDocument extends Document {
           <meta name='keywords' content='Keywords' />
 
           <link rel="manifest" href="/manifest.json" />
-          <link href='/images/icons/icon-72x72.png' rel='icon' type='image/png' sizes='72x72' />
-          <link href='/images/icons/icon-96x96.png' rel='icon' type='image/png' sizes='96x96' />
+          <link href='/images/icons/favicon-16x16.png' rel='icon' type='image/png' sizes='16x16' />
+          <link href='/images/icons/favicon-32x32.png' rel='icon' type='image/png' sizes='32x32' />
           <link rel="apple-touch-icon" href="/apple-icon.png"></link>
           <meta name="theme-color" content="#317EFB"/>
         </Head>

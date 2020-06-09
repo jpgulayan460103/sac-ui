@@ -37,7 +37,6 @@ const HheadTable = (props) => {
   const onClose = () => {
     setVisible(false);
   };
-  const FileDownload = require('js-file-download');
   const exportData = () => {
     API.Hhead.export()
     .then(res => {
