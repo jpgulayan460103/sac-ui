@@ -6,6 +6,7 @@ import Router from 'next/router'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import ls, { set } from 'local-storage'
 import Swal from 'sweetalert2/dist/sweetalert2.js'
+import _cloneDeep from 'lodash/cloneDeep'
 
 const { Option } = Select;
 
@@ -34,12 +35,45 @@ const RegistrationForm = (props) => {
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [barangay, setBarangay] = useState("");
+  const [formType, setFormType] = useState("create");
+  const [userId, setUserId] = useState(null);
   useEffect(() => {
     getProvinces();
   }, []);
+  useEffect(() => {
+    if(props.userData != null){
+      setFormType("update");
+      let userData = _cloneDeep(props.userData);
+      setUserId(userData.id);
+      setUserPosition(userData.position);
+      if(userData.barangay_id){
+        setCity(userData.barangay.city_psgc);
+        setProvince(userData.barangay.province_psgc);
+        userData.city = userData.barangay.city_psgc;
+        userData.province = userData.barangay.province_psgc;
+        setBarangay(userData.barangay_id);
+        setCities([{
+          city_name: userData.barangay.city_name,
+          city_psgc: userData.barangay.city_psgc,
+        }]);
+        setBarangays([{
+          barangay_name: userData.barangay.barangay_name,
+          id: userData.barangay.id,
+        }]);
+      }
+      formRef.current.setFieldsValue({
+        ...userData
+      });
+    }
+  }, [props.userData]);
   const onSubmit = values => {
     setSubmit(true);
-    API.User.save(values)
+    if(formType == "update"){
+      values.id = userId;
+    }
+    console.log(values);
+    
+    API.User.save(values, formType)
     .then(res => {
       setSubmit(false);
       setFormError({});
@@ -174,23 +208,27 @@ const RegistrationForm = (props) => {
           <Input prefix={<UserOutlined />} />
         </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          {...displayErrors('password')}
-          rules={[{ required: true, message: 'Please input your password!' }]}
-        >
-          <Input.Password prefix={<LockOutlined />} />
-        </Form.Item>
+        { formType == "create" ? (
+          <React.Fragment>
+            <Form.Item
+              label="Password"
+              name="password"
+              {...displayErrors('password')}
+              rules={[{ required: true, message: 'Please input your password!' }]}
+            >
+              <Input.Password prefix={<LockOutlined />} />
+            </Form.Item>
 
-        <Form.Item
-          label="Confirm Password"
-          name="password_confirmation"
-          {...displayErrors('password_confirmation')}
-          rules={[{ required: true, message: 'Please input your password!' }]}
-        >
-          <Input.Password prefix={<LockOutlined />} />
-        </Form.Item>
+            <Form.Item
+              label="Confirm Password"
+              name="password_confirmation"
+              {...displayErrors('password_confirmation')}
+              rules={[{ required: true, message: 'Please input your password!' }]}
+            >
+              <Input.Password prefix={<LockOutlined />} />
+            </Form.Item>
+          </React.Fragment>
+        ) : "" }
 
         <Form.Item
           label="First Name"

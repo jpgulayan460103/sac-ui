@@ -2,7 +2,6 @@ import Head from 'next/head'
 import Headers from '../components/Headers'
 import AuthChecker from '../components/AuthChecker'
 import EncodingGuidelines from '../components/EncodingGuidelines'
-import Menus from '../components/Menus'
 import { Provider } from 'react-redux'
 import { Layout, BackTop  } from "antd";
 
