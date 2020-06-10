@@ -14,6 +14,7 @@ import queryString from "query-string";
 import Swal from 'sweetalert2/dist/sweetalert2.js'
 import Router from 'next/router'
 import HmemberForm from './HmemberForm'
+import ls from 'local-storage'
 
 
 const { confirm } = Modal;
@@ -49,9 +50,38 @@ const HheadForm = (props) => {
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [barangays, setBarangays] = useState([]);
+  const [isLgu, setisLgu] = useState(false);
   const formRef = React.useRef();
   const secondFormRef = React.useRef();
   const isMountedRef = React.useRef(null);
+  useEffect(() => {
+    let user = ls('auth');
+    if(user){
+      console.log(user);
+      
+      // setisLgu(user.barangay_id != null);
+      let is_lgu = user.barangay_id != null
+      if(is_lgu){
+        setisLgu(true);
+        let preSetBarangay = {};
+        preSetBarangay.probinsya = user.barangay.province_name;
+        preSetBarangay.lungsod = user.barangay.city_name;
+        preSetBarangay.barangay_id = user.barangay.id;
+        setCities([{
+          city_name: user.barangay.city_name,
+          city_psgc: user.barangay.city_psgc,
+        }]);
+        setBarangays([{
+          barangay_name: user.barangay.barangay_name,
+          id: user.barangay.id,
+        }]);
+        setFormFields(user.barangay.id, 'barangay_id', true);
+        formRef.current.setFieldsValue({
+          ...preSetBarangay
+        });
+      }
+    }
+  }, []);
   useEffect(() => {
     if(props.viewStatus == "edit"){
       formRef.current.setFieldsValue({
@@ -571,12 +601,12 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Probinsya" name="probinsya" {...displayErrors('probinsya')}>
-            <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={props.formData.lungsod && props.formData.lungsod != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+            <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={(props.formData.lungsod && props.formData.lungsod != "") || isLgu} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
               { populateProvinces() }
             </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Lungsod/Bayan" name="lungsod" {...displayErrors('lungsod')}>
-              <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={props.formData.barangay_id && props.formData.barangay_id != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={(props.formData.barangay_id && props.formData.barangay_id != "") && isLgu} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
                 { populateCities() }
               </Select>
           </Form.Item>
@@ -586,7 +616,7 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay_id" {...displayErrors('barangay_id')}>
-              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={() => {clearBarangaySelection()}  }>
+              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={() => {clearBarangaySelection()} } disabled={isLgu}>
                 { populateBarangays() }
               </Select>
           </Form.Item>
