@@ -42,7 +42,12 @@ const UserTable = (props) => {
   const getUser = () => {
     API.User.getUsers()
     .then(res => {
-      setUsers(res.data.users.data);
+      let users_response = res.data.users.data;
+      users_response.map(item => {
+        item.key = item.id;
+        return item;
+      })
+      setUsers(users_response);
     })
     .catch(res => {})
     .then(res => {})
@@ -147,8 +152,8 @@ const UserTable = (props) => {
           onOk={handleOk}
           onCancel={handleCancel}
         >
-          <RegistrationForm userData={userData} />
-        </Modal>
+        <RegistrationForm userData={userData} type="update" />
+      </Modal>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Router from 'next/router'
 import ls from 'local-storage'
 import API from '../api'
+import UserSettings from '../components/UserSettings'
 
 import {
   HomeOutlined,
@@ -37,6 +38,7 @@ const Headers = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isShown, setIsShown] = useState(false);
   const [user, setUser] = useState({});
+  const [showSetting, setShowSetting] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   useEffect(() => {
     let auth = ls('auth');
@@ -52,11 +54,18 @@ const Headers = (props) => {
     });
   };
 
+  const handleHideSettingsForm = (langValue) => {
+    setShowSetting(langValue)
+  }
+
   const menu = (user) => (
     <React.Fragment>
+    
     <Menu>
       <Menu.Item>
-        <UserOutlined style={{ fontSize: '18px' }} /> { (user ? user.username : "") }
+        <a rel="noopener noreferrer" onClick={() => { setShowSetting(true) }}>
+          <UserOutlined style={{ fontSize: '18px' }} /> { (user ? user.username : "") }
+        </a>
       </Menu.Item>
       { user.role == "admin" ? (
         <Menu.Item>
@@ -86,6 +95,7 @@ const Headers = (props) => {
         </a>
       </Menu.Item>
     </Menu>
+    <UserSettings showForm={showSetting} hideForm={handleHideSettingsForm} />
     </React.Fragment>
   );
 

@@ -37,6 +37,7 @@ const RegistrationForm = (props) => {
   const [barangay, setBarangay] = useState("");
   const [formType, setFormType] = useState("create");
   const [userId, setUserId] = useState(null);
+  const [changePassword, setChangePassword] = useState(false);
   useEffect(() => {
     getProvinces();
   }, []);
@@ -77,10 +78,22 @@ const RegistrationForm = (props) => {
     .then(res => {
       setSubmit(false);
       setFormError({});
-      formRef.current.resetFields();
+      if(props.type == "registration"){
+        formRef.current.resetFields();
+      }
+      let message = "";
+      let title = "Success";
+      if(formType == "create"){
+        title = "Registration success";
+        message = "Please contact administrator to activate your account.";
+      }else if(props.type == "user"){
+        message = "Account settings have been updated.";
+      }else{
+        message = "User has been updated. ";
+      }
       Swal.fire({
-        title: 'Registration success',
-        text: 'Please contact administrator to activate your account.',
+        title: title,
+        text: message,
         icon: 'success',
         confirmButtonText: 'OK',
         onClose: () => {
@@ -185,10 +198,6 @@ const RegistrationForm = (props) => {
     }
   }
 
-  const clearBarangaySelection = () =>{
-    // getCities(props.formData.barangay.province_psgc)
-    // getBarangays(props.formData.barangay.city_psgc)
-  }
   return (
     <div>
       <Form
@@ -208,7 +217,14 @@ const RegistrationForm = (props) => {
           <Input prefix={<UserOutlined />} />
         </Form.Item>
 
-        { formType == "create" ? (
+        { props.type == "user" || props.type == "update" ? (
+          <Form.Item {...tailLayout} name="change_password" valuePropName="checked">
+            <Checkbox onChange={(e) => {setChangePassword(e.target.checked)}}>Change Password</Checkbox>
+          </Form.Item>
+        ) : "" }
+
+
+        { formType == "create" || changePassword ? (
           <React.Fragment>
             <Form.Item
               label="Password"
@@ -257,52 +273,58 @@ const RegistrationForm = (props) => {
         </Form.Item>
 
         <Form.Item
-          label="Position"
-          name="position"
-          {...displayErrors('position')}
-          rules={[{ required: true, message: 'Please select your position' }]}
-        >
-          <Select style={{ width: "100%" }} placeholder="Position" onSelect={(e) => {setUserPosition(e)}}>
-            <Option value="Field Staff">Field Staff</Option>
-            <Option value="LGU Staff">LGU Staff</Option>
-          </Select>
-        </Form.Item>
+            label="Position"
+            name="position"
+            {...displayErrors('position')}
+            rules={[{ required: true, message: 'Please select your position' }]}
+          >
+            <Select style={{ width: "100%" }} placeholder="Position" onSelect={(e) => {setUserPosition(e)}} disabled={props.type=="user"}>
+              <Option value="Field Staff">Field Staff</Option>
+              <Option value="LGU Staff">LGU Staff</Option>
+            </Select>
+          </Form.Item>
 
-        { (userPosition== "LGU Staff") ? (
+        { props.type == "registration" || props.type == "update" ? (
           <>
-          <Form.Item
-            label="Province"
-            name="province"
-            {...displayErrors('province')}
-            rules={[{ required: true, message: 'Please select your position' }]}
-          >
-            <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={city != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-              { populateProvinces() }
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="City/Municipality"
-            name="city"
-            {...displayErrors('city')}
-            rules={[{ required: true, message: 'Please select your position' }]}
-          >
-            <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={barangay != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-                { populateCities() }
+          { (userPosition== "LGU Staff") ? (
+            <>
+            <Form.Item
+              label="Province"
+              name="province"
+              {...displayErrors('province')}
+              rules={[{ required: true, message: 'Please select your position' }]}
+            >
+              <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={city != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+                { populateProvinces() }
               </Select>
-          </Form.Item>
-          
-          <Form.Item
-            label="Barangay"
-            name="barangay_id"
-            {...displayErrors('barangay_id')}
-            rules={[{ required: true, message: 'Please select your position' }]}
-          >
-            <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {formSetBarangay(e)}  }>
-              { populateBarangays() }
-            </Select>
-          </Form.Item>
+            </Form.Item>
+            <Form.Item
+              label="City/Municipality"
+              name="city"
+              {...displayErrors('city')}
+              rules={[{ required: true, message: 'Please select your position' }]}
+            >
+              <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={barangay != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+                  { populateCities() }
+                </Select>
+            </Form.Item>
+            
+            <Form.Item
+              label="Barangay"
+              name="barangay_id"
+              {...displayErrors('barangay_id')}
+              rules={[{ required: true, message: 'Please select your position' }]}
+            >
+              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {formSetBarangay(e)}  }>
+                { populateBarangays() }
+              </Select>
+            </Form.Item>
+            </>
+          ) : "" }
           </>
         ) : "" }
+
+        
 
 
         <Form.Item {...tailLayout}>
