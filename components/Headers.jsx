@@ -39,13 +39,13 @@ const Headers = (props) => {
   const [user, setUser] = useState({});
   const toggle = () => setIsOpen(!isOpen);
   useEffect(() => {
-    let loggedUser = ls('auth');
-    setUser(loggedUser);
+    let auth = ls('auth');
+    if(auth){
+      setUser(auth);
+    }
   }, []);
 
   const showDrawer = () => {
-    console.log("asdhasdh");
-    
     props.dispatch({
       type: "SHOW_GUIDELINES",
       data: true
@@ -58,6 +58,13 @@ const Headers = (props) => {
       <Menu.Item>
         <UserOutlined style={{ fontSize: '18px' }} /> { (user ? user.username : "") }
       </Menu.Item>
+      { user.role == "admin" ? (
+        <Menu.Item>
+          <a rel="noopener noreferrer" onClick={() => { Router.push('/users') }}>
+          <UserOutlined style={{ fontSize: '18px' }} /> Users
+          </a>
+        </Menu.Item>
+      ) : "" }
       <Menu.Item>
         <a rel="noopener noreferrer" onClick={() => { Router.push('/') }}>
         <UnorderedListOutlined style={{ fontSize: '18px' }} /> SAC Encoding

@@ -23,7 +23,7 @@ const tailLayout = {
   wrapperCol: { offset: 5, span: 17 },
 };
 
-const LoginForm = (props) => {
+const RegistrationForm = (props) => {
   const formRef = React.useRef();
   const [submit, setSubmit] = useState(false);
   const [userPosition, setUserPosition] = useState("");
@@ -53,6 +53,9 @@ const LoginForm = (props) => {
 
         }
       })
+      setBarangay("");
+      setProvince("");
+      setCity("");
     })
     .catch(err => {
       setFormError(err.response.data.errors);
@@ -274,11 +277,11 @@ const LoginForm = (props) => {
   );
 };
 
-LoginForm.propTypes = {
+RegistrationForm.propTypes = {
   
 };
 
 
 export default connect(
   mapStateToProps,
-)(LoginForm);
+)(RegistrationForm);
