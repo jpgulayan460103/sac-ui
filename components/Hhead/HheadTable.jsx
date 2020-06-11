@@ -54,7 +54,7 @@ const HheadTable = (props) => {
       let intiialSettings = {
         startDate: startDateFilter,
         endDate: endDateFilter,
-        searchString: searchStringFilter,
+        query: searchStringFilter,
         path: `${url}${res.data.path}`,
         filename: res.data.filename,
         totalPage: 0,
