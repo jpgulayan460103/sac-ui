@@ -45,6 +45,12 @@ export default function userReducer(state = initialState(), action) {
         ...state,
         exporting: action.data
       }
+    case 'SET_USER':
+      return {
+        ...state,
+        user: action.data,
+        isLogged: true,
+      }
     case 'SET_INITIAL_STATE':
       state = initialState();
       return state

@@ -19,6 +19,7 @@ function mapStateToProps(state) {
   return {
     exportData: state.user.exportData,
     exporting: state.user.exporting,
+    user: state.user.user,
   };
 }
 const handleClick = () => {}
@@ -281,8 +282,19 @@ const HheadTable = (props) => {
       key: 'address',
       render: (text, record) => (
         <>
-          <span key={record.id}>
+          <span key={`address_${record.id}`}>
             <span>{record.barangay.barangay_name}, {record.barangay.city_name} {record.barangay.province_name}</span>
+          </span>
+        </>
+      ),
+    },
+    {
+      title: 'Encoded on',
+      key: 'created_at',
+      render: (text, record) => (
+        <>
+          <span key={`created_at_${record.id}`}>
+            <span>{ moment(record.created_at).format("MM/DD/YYYY") }</span>
           </span>
         </>
       ),
@@ -296,7 +308,7 @@ const HheadTable = (props) => {
         <>
           <Button onClick={() => { showHhead(record) }} key={`view-${record.id}`}>View</Button>
           <Button onClick={() => { editHhead(record) }} key={`edit-${record.id}`}>Edit</Button>
-          { record.allow_delete ? (<Button type="danger" onClick={() => { deleteHhead(record, index) }} key={`delete-${record.id}`}>Delete</Button>) : "" }
+          { record.allow_delete || props.user.role == "admin" ? (<Button type="danger" onClick={() => { deleteHhead(record, index) }} key={`delete-${record.id}`}>Delete</Button>) : "" }
           
         </>
       ),

@@ -20,7 +20,7 @@ import { Menu, Dropdown } from 'antd';
 
 function mapStateToProps(state) {
   return {
-    
+    user: state.user.user
   };
 }
 
@@ -37,15 +37,8 @@ const MenuIcon = (props) => {
 const Headers = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isShown, setIsShown] = useState(false);
-  const [user, setUser] = useState({});
   const [showSetting, setShowSetting] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
-  useEffect(() => {
-    let auth = ls('auth');
-    if(auth){
-      setUser(auth);
-    }
-  }, []);
 
   const showDrawer = () => {
     props.dispatch({
@@ -127,7 +120,7 @@ const Headers = (props) => {
             </div>
             <div className="float-right space-x-4">
 
-              <Dropdown overlay={menu(user)} trigger={['click']} placement="bottomRight">
+              <Dropdown overlay={menu(props.user)} trigger={['click']} placement="bottomRight">
                 <a className="px-1 ">Menu <MenuIcon icon={<CaretDownOutlined />} label="Menu" /></a>
               </Dropdown>
             </div>
