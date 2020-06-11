@@ -8,6 +8,7 @@ import _isEmpty from 'lodash/isEmpty'
 import moment from 'moment'
 import Router from 'next/router';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import HheadExportProgress from './HheadExportProgress'
 
 
 const { confirm } = Modal;
@@ -16,23 +17,24 @@ const { RangePicker } = DatePicker;
 const { Search } = Input;
 function mapStateToProps(state) {
   return {
-    
+    exportData: state.user.exportData,
+    exporting: state.user.exporting,
   };
 }
 const handleClick = () => {}
 const HheadTable = (props) => {
   const [hheads, setHheads] = useState([]);
   const [selectedHhead, setSelectedHhead] = useState({});
-  const [exporting, setExporting] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("");
   const [pagination, setPagination] = useState({});
   const [tableLoading, setTableLoading] = useState(true);
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
+  const [searchStringFilter, setSearchStringFilter] = useState("");
   useEffect(() => {
     getHouseholdHeads(1);
     props.dispatch({
-      type: "SET_INITIAL_STATE",
+      type: "SET_INITIAL_HHEAD_STATE",
       data: {}
     });
   }, []);
@@ -48,11 +50,66 @@ const HheadTable = (props) => {
     API.Hhead.export()
     .then(res => {
       let url = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
-      // window.location.href = `${url}${res.data.filename}`;
+      let intiialSettings = {
+        startDate: startDateFilter,
+        endDate: endDateFilter,
+        searchString: searchStringFilter,
+        path: `${url}${res.data.path}`,
+        filename: res.data.filename,
+        totalPage: 0,
+        currentPage: 0,
+        percentage: 0,
+      };
+      props.dispatch({
+        type: "SET_HHEAD_EXPORT_REQUEST",
+        data: intiialSettings
+      });
+      props.dispatch({
+        type: "SET_HHEAD_EXPORTING",
+        data: true
+      });
+      processExport(intiialSettings);
     })
     .catch(err => {})
     .then(res => {})
     ;
+  }
+
+  const processExport = (intiialSettings = {}) => {
+    let exportSettings;
+    if(!_isEmpty(intiialSettings)){
+      exportSettings = _cloneDeep(intiialSettings);
+    }else{
+      exportSettings = _cloneDeep(props.exportData);
+    }
+    exportSettings.page = exportSettings.currentPage + 1;
+    API.Hhead.processExport(exportSettings)
+    .then(res => {
+      exportSettings.totalPage = res.data.total_pages;
+      if(exportSettings.currentPage != exportSettings.totalPage){
+        exportSettings.currentPage++;
+        let percentage = ((exportSettings.currentPage / exportSettings.totalPage) * 100).toFixed(2)
+        exportSettings.percentage = percentage;
+        processExport(exportSettings);
+        props.dispatch({
+          type: "SET_HHEAD_EXPORT_REQUEST",
+          data: {
+            ...props.exportData,
+            ...exportSettings
+          }
+        });
+      }else{
+        props.dispatch({
+          type: "SET_HHEAD_EXPORTING",
+          data: false
+        });
+        window.location.href = exportSettings.path;
+      }
+    })
+    .catch(res => {
+      processExport(exportSettings);
+    })
+    .then(res => {});
   }
 
   const getHouseholdHeads = (currentPage = 1, searchString = "") => {
@@ -137,12 +194,12 @@ const HheadTable = (props) => {
     clonedHheadData.katutubo = clonedHheadData.katutubo == "Y" ? true : false;
     clonedHheadData.sac_number = pad(parseInt(clonedHheadData.sac_number), 8); ;
     clonedHheadData.bene_others = clonedHheadData.bene_others == "Y" ? true : false;
-    clonedHheadData.kapanganakan = moment.parseZone(clonedHheadData.kapanganakan).utc();
-    clonedHheadData.petsa_ng_pagrehistro = moment.parseZone(clonedHheadData.petsa_ng_pagrehistro).utc();
+    clonedHheadData.kapanganakan = moment.parseZone(clonedHheadData.kapanganakan);
+    clonedHheadData.petsa_ng_pagrehistro = moment.parseZone(clonedHheadData.petsa_ng_pagrehistro);
     clonedHheadData.age = getAge(clonedHheadData.kapanganakan.format("YYYY/MM/DD"));
     setDrawerTitle(clonedHheadData.barcode_number);
     clonedHheadData.members.data.map(member => {
-      member.kapanganakan = moment.parseZone(member.kapanganakan).utc();
+      member.kapanganakan = moment.parseZone(member.kapanganakan);
       member.age = getAge(member.kapanganakan.format("YYYY/MM/DD"));
       return member; 
     })
@@ -182,6 +239,7 @@ const HheadTable = (props) => {
 
   const searchHhead = (searchString) => {
     getHouseholdHeads(1, searchString);
+    setSearchStringFilter(searchString);
   }
   const paginationClick = (e) => {
     getHouseholdHeads(e);
@@ -193,8 +251,8 @@ const HheadTable = (props) => {
       return true;
     }
     let [ startDate, endDate ] = ranges;
-    startDate = moment.parseZone(startDate).utc().format("YYYY-MM-DD");
-    endDate = moment.parseZone(endDate).utc().format("YYYY-MM-DD");
+    startDate = moment.parseZone(startDate).format("YYYY-MM-DD");
+    endDate = moment.parseZone(endDate).format("YYYY-MM-DD");
     setStartDateFilter(startDate);
     setEndDateFilter(endDate);
   }
@@ -261,8 +319,15 @@ const HheadTable = (props) => {
       </div>
       <br />
       <span className="space-x-1">
-          <span>Total records: <b>{pagination.total}</b></span>
-          <a href="#!" onClick={() => {exportData()}}>Export Data</a>
+          <span>Total records: <b>{pagination.total}</b>.</span>
+          { (props.exporting ? (
+            <span className="space-x-1">
+            <span>Exporting in the background, you may continue using the app.</span>
+            <HheadExportProgress />
+            </span>
+          ) : (
+            <a href="#!" onClick={() => {exportData()}}>Export Data</a>
+          )) }
         </span>
       <Table dataSource={dataSource} columns={columns} pagination={false} loading={tableLoading} />
       <div className="p-4 pull-right">

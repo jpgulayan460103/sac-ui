@@ -61,7 +61,9 @@ export default function hheadReducer(state = initialState(), action) {
     case 'SET_INITIAL_STATE':
       state = initialState();
       return state
-    
+    case 'SET_INITIAL_HHEAD_STATE':
+      state = initialState();
+      return state
     default:
       return state;
   }

@@ -6,6 +6,8 @@ const initialState = () => {
     accessToken: "",
     user: {},
     guidelineDrawer: false,
+    exportData: {},
+    exporting: false
   }
 }
 
@@ -33,6 +35,16 @@ export default function userReducer(state = initialState(), action) {
       ls.remove('user')
       state = initialState();
       return state
+    case 'SET_HHEAD_EXPORT_REQUEST':
+      return {
+        ...state,
+        exportData: action.data
+      }
+    case 'SET_HHEAD_EXPORTING':
+      return {
+        ...state,
+        exporting: action.data
+      }
     case 'SET_INITIAL_STATE':
       state = initialState();
       return state

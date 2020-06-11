@@ -1,4 +1,5 @@
 import axios from './axios-settings'
+import axiosExport from './axios-export-settings'
 import moment from 'moment'
 import _forEach from 'lodash/forEach'
 import _cloneDeep from 'lodash/cloneDeep'
@@ -46,7 +47,10 @@ export default {
     return axios.get(`api/barangay-officials/${id}`);
   },
   export(){
-    return axios.post(`api/household-heads/export`);
+    return axios.post(`api/export/household-heads/create`);
+  },
+  processExport(exportSettings){
+    return axiosExport.post(`api/export/household-heads/write`,exportSettings);
   },
   
 }
