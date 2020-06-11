@@ -120,6 +120,7 @@ const HheadTable = (props) => {
 
   const getHouseholdHeads = (currentPage = 1, searchString = "") => {
     setTableLoading(true);
+    searchString = searchString == "" ? searchStringFilter : searchString;
     let options = {
       page: currentPage,
       query: searchString,
