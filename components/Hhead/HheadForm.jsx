@@ -57,16 +57,17 @@ const HheadForm = (props) => {
   useEffect(() => {
     let user = ls('auth');
     if(user){
-      console.log(user);
-      
-      // setisLgu(user.barangay_id != null);
       let is_lgu = user.barangay_id != null
       if(is_lgu){
         setisLgu(true);
         let preSetBarangay = {};
-        preSetBarangay.probinsya = user.barangay.province_name;
-        preSetBarangay.lungsod = user.barangay.city_name;
+        preSetBarangay.probinsya = user.barangay.province_psgc;
+        preSetBarangay.lungsod = user.barangay.city_psgc;
         preSetBarangay.barangay_id = user.barangay.id;
+        setProvinces([{
+          province_name: user.barangay.province_name,
+          province_psgc: user.barangay.province_psgc,
+        }]);
         setCities([{
           city_name: user.barangay.city_name,
           city_psgc: user.barangay.city_psgc,
@@ -75,10 +76,8 @@ const HheadForm = (props) => {
           barangay_name: user.barangay.barangay_name,
           id: user.barangay.id,
         }]);
-        setFormFields(user.barangay.id, 'barangay_id', true);
-        formRef.current.setFieldsValue({
-          ...preSetBarangay
-        });
+      }else{
+        getProvinces();
       }
     }
   }, []);
@@ -129,13 +128,12 @@ const HheadForm = (props) => {
       }]);
     }
   }, [props.formType]);
-  useEffect(() => {
-    getProvinces();
-  }, []);
   const getProvinces = () => {
     API.Barangay.getProvinces()
     .then(res => {
-      setProvinces(res.data.provinces);
+      if(!isLgu){
+        setProvinces(res.data.provinces);
+      }
     })
     .catch(res => {
     })
@@ -143,10 +141,14 @@ const HheadForm = (props) => {
     ;;
   }
   const getCities = (e) => {
-    setCities([]);
+    if(!isLgu){
+      setCities([]);
+    }
     API.Barangay.getCities(e)
     .then(res => {
-      setCities(res.data.cities);
+      if(!isLgu){
+        setCities(res.data.cities);
+      }
     })
     .catch(res => {
     })
@@ -154,11 +156,15 @@ const HheadForm = (props) => {
     ;;
   }
   const getBarangays = (city_psgc) => {
-    setBarangays([]);
+    if(!isLgu){
+      setBarangays([]);
+    }
     let province_psgc = props.formData.probinsya;
     API.Barangay.getBarangays(province_psgc,city_psgc)
     .then(res => {
-      setBarangays(res.data.barangays);
+      if(!isLgu){
+        setBarangays(res.data.barangays);
+      }
     })
     .catch(res => {
     })
@@ -601,12 +607,12 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Probinsya" name="probinsya" {...displayErrors('probinsya')}>
-            <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={(props.formData.lungsod && props.formData.lungsod != "") || isLgu} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+            <Select allowClear placeholder="Probinsya" style={{ width: '100%' }} onChange={(e) => getCities(e)} disabled={(props.formData.lungsod && props.formData.lungsod != "")} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
               { populateProvinces() }
             </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Lungsod/Bayan" name="lungsod" {...displayErrors('lungsod')}>
-              <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={(props.formData.barangay_id && props.formData.barangay_id != "") && isLgu} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '100%' }} onChange={(e) => getBarangays(e)}  disabled={(props.formData.barangay_id && props.formData.barangay_id != "")} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
                 { populateCities() }
               </Select>
           </Form.Item>
@@ -616,14 +622,14 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay_id" {...displayErrors('barangay_id')}>
-              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={() => {clearBarangaySelection()} } disabled={isLgu}>
+              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={() => {clearBarangaySelection()} }>
                 { populateBarangays() }
               </Select>
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')} onBlur={(e) => { setFormFields(e,'rehiyon') }} >
             <Input autoComplete="off" placeholder="Rehiyon" value="XI" disabled/>
           </Form.Item>
-          <Form.Item style={{ width: '23%' }} label="Petsa ng kapanganakan" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')} onBlur={(e) => { setFormFields(e,'kapanganakan') }} >
+          <Form.Item style={{ width: '23%' }} label="Kapanganakan (MM/DD/YYYY)" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')} onBlur={(e) => { setFormFields(e,'kapanganakan') }} >
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />
           </Form.Item>
           <Form.Item style={{ width: '10%' }} label="Edad" name="age" hasFeedback {...displayErrors('age')} onBlur={(e) => { setFormFields(e,'age') }} >
