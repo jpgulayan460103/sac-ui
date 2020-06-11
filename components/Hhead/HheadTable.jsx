@@ -7,7 +7,12 @@ import _cloneDeep from 'lodash/cloneDeep'
 import _isEmpty from 'lodash/isEmpty'
 import moment from 'moment'
 import Router from 'next/router';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  ExclamationCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+} from '@ant-design/icons';
 import HheadExportProgress from './HheadExportProgress'
 
 
@@ -289,11 +294,12 @@ const HheadTable = (props) => {
       ),
     },
     {
-      title: 'Encoded on',
+      title: 'Encoded by/on',
       key: 'created_at',
       render: (text, record) => (
         <>
           <span key={`created_at_${record.id}`}>
+            <span>{ record.user.name }</span> <br />
             <span>{ moment(record.created_at).format("MM/DD/YYYY") }</span>
           </span>
         </>
@@ -306,9 +312,9 @@ const HheadTable = (props) => {
       align: "right",
       render: (text, record, index) => (
         <>
-          <Button onClick={() => { showHhead(record) }} key={`view-${record.id}`}>View</Button>
-          <Button onClick={() => { editHhead(record) }} key={`edit-${record.id}`}>Edit</Button>
-          { record.allow_delete || props.user.role == "admin" ? (<Button type="danger" onClick={() => { deleteHhead(record, index) }} key={`delete-${record.id}`}>Delete</Button>) : "" }
+          <Button title="View" onClick={() => { showHhead(record) }} key={`view-${record.id}`}><EyeOutlined /></Button>
+          <Button title="Edit" onClick={() => { editHhead(record) }} key={`edit-${record.id}`}><EditOutlined /></Button>
+          { record.allow_delete || props.user.role == "admin" ? (<Button title="Delete" type="danger" onClick={() => { deleteHhead(record, index) }} key={`delete-${record.id}`}><DeleteOutlined /></Button>) : "" }
           
         </>
       ),
