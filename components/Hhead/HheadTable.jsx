@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import API from '../../api'
-import { Typography, Table, Drawer, Button, Modal } from 'antd';
+import { Typography, Table, Drawer, Button, Modal, Pagination, DatePicker, Input } from 'antd';
 import HheadForm from './HheadForm'
 import _cloneDeep from 'lodash/cloneDeep'
+import _isEmpty from 'lodash/isEmpty'
 import moment from 'moment'
 import Router from 'next/router';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
@@ -11,6 +12,8 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 const { confirm } = Modal;
 const { Title } = Typography;
+const { RangePicker } = DatePicker;
+const { Search } = Input;
 function mapStateToProps(state) {
   return {
     
@@ -22,8 +25,12 @@ const HheadTable = (props) => {
   const [selectedHhead, setSelectedHhead] = useState({});
   const [exporting, setExporting] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("");
+  const [pagination, setPagination] = useState({});
+  const [tableLoading, setTableLoading] = useState(true);
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   useEffect(() => {
-    getHouseholdHeads();
+    getHouseholdHeads(1);
     props.dispatch({
       type: "SET_INITIAL_STATE",
       data: {}
@@ -41,25 +48,41 @@ const HheadTable = (props) => {
     API.Hhead.export()
     .then(res => {
       let url = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
-      window.location.href = `${url}${res.data.filename}`;
+      // window.location.href = `${url}${res.data.filename}`;
     })
     .catch(err => {})
     .then(res => {})
     ;
   }
 
-  const getHouseholdHeads = () => {
-    API.Hhead.all()
+  const getHouseholdHeads = (currentPage = 1, searchString = "") => {
+    setTableLoading(true);
+    let options = {
+      page: currentPage,
+      query: searchString,
+    };
+    if(startDateFilter != ""){
+      options.startDate = startDateFilter;
+      options.endDate = endDateFilter;
+    }
+    API.Hhead.all(options)
     .then(res => {
+      setTableLoading(false);
       let hheads_response = res.data.household_heads.data;
+      let pagination_response = res.data.household_heads.meta.pagination;
       hheads_response.map(item => {
         item.key = item.id;
         return item;
       })
       setHheads(hheads_response);
+      setPagination(pagination_response);
     })
-    .catch(err => {})
-    .then(res => {})
+    .catch(err => {
+      setTableLoading(false);
+    })
+    .then(res => {
+      setTableLoading(false);
+    })
   }
 
   const showHhead = (data) => {
@@ -157,6 +180,24 @@ const HheadTable = (props) => {
     setHheads(newData);
   }
 
+  const searchHhead = (searchString) => {
+    getHouseholdHeads(1, searchString);
+  }
+  const paginationClick = (e) => {
+    getHouseholdHeads(e);
+  }
+  const datePickerChange = (ranges) => {
+    if(ranges == null){
+      setStartDateFilter("");
+      setEndDateFilter("");
+      return true;
+    }
+    let [ startDate, endDate ] = ranges;
+    startDate = moment.parseZone(startDate).utc().format("YYYY-MM-DD");
+    endDate = moment.parseZone(endDate).utc().format("YYYY-MM-DD");
+    setStartDateFilter(startDate);
+    setEndDateFilter(endDate);
+  }
 
   const dataSource = hheads;
   
@@ -208,11 +249,34 @@ const HheadTable = (props) => {
   return (
     <div>
       <Title level={2} style={{textAlign: "center"}}>Encoded SAC Forms</Title>
+      <br />
+      <div className="space-x-2">
+        <span>Search:</span>
+        <Search
+          placeholder="input search text"
+          onSearch={value => searchHhead(value)}
+          style={{ width: 200 }}
+        />
+        <RangePicker onChange={(e) => {datePickerChange(e)}} />
+      </div>
+      <br />
       <span className="space-x-1">
-        <span>Total records: {hheads.length}</span>
-        <a href="#!" onClick={() => {exportData()}}>Export Data</a>
-      </span>
-      <Table dataSource={dataSource} columns={columns} />
+          <span>Total records: <b>{pagination.total}</b></span>
+          <a href="#!" onClick={() => {exportData()}}>Export Data</a>
+        </span>
+      <Table dataSource={dataSource} columns={columns} pagination={false} loading={tableLoading} />
+      <div className="p-4 pull-right">
+        { !_isEmpty(pagination) ? (
+          <Pagination
+            defaultCurrent={pagination.current_page}
+            total={pagination.total}
+            pageSize={pagination.per_page}
+            showSizeChanger={false}
+            onChange={(e) => {paginationClick(e)}}
+            showQuickJumper
+          />
+        ) : "" }
+      </div>
       
 
       <Drawer
