@@ -3,20 +3,21 @@ import React, { Component } from 'react';
 import { Provider } from 'react-redux'
 import Layouts from './../layouts/layouts'
 import HheadForm from '../components/Hhead/HheadForm'
+import Encoded from '../components/Report/encoded'
 import store from '../store'
 
 
-const index = () => {
+const encodingReport = () => {
   return (
     <Provider store={store}>
       <Head>
-        <title>SAC Encoding | Social Amelioration Information System</title>
+        <title>Encoding Report | Social Amelioration Information System</title>
       </Head>
       <Layouts>
-        <HheadForm viewStatus="edit" />
+        <Encoded />
       </Layouts>
     </Provider>
   );
 };
 
-export default index;
+export default encodingReport;

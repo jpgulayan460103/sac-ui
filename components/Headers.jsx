@@ -6,8 +6,8 @@ import API from '../api'
 import UserSettings from '../components/UserSettings'
 
 import {
-  HomeOutlined,
-  SettingFilled,
+  ProfileOutlined,
+  FormOutlined,
   UnorderedListOutlined,
   UserOutlined,
   CaretDownOutlined,
@@ -69,12 +69,17 @@ const Headers = (props) => {
       ) : "" }
       <Menu.Item>
         <a rel="noopener noreferrer" onClick={() => { Router.push('/') }}>
-        <UnorderedListOutlined style={{ fontSize: '18px' }} /> SAC Encoding
+        <FormOutlined style={{ fontSize: '18px' }} /> SAC Encoding
         </a>
       </Menu.Item>
       <Menu.Item>
         <a rel="noopener noreferrer" onClick={() => { Router.push('/beneficiaries') }}>
         <UnorderedListOutlined style={{ fontSize: '18px' }} /> Encoded SAC Forms
+        </a>
+      </Menu.Item>
+      <Menu.Item>
+        <a rel="noopener noreferrer" onClick={() => { Router.push('/encoding-report') }}>
+        <ProfileOutlined style={{ fontSize: '18px' }} /> Encoding Report
         </a>
       </Menu.Item>
       <Menu.Item>

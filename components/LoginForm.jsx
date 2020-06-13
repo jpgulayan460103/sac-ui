@@ -32,9 +32,15 @@ const LoginForm = props => {
       let createdToken = res.data.createdToken;
       user.createdToken = createdToken;
       ls.set('auth',user);
-      location.reload("/");
+      if(user.role == "admin"){
+        window.location = "/encoding-report";
+      }else{
+        location.reload();
+      }
     })
     .catch(err => {
+      console.log(err);
+      
       setSubmit(false);
       if(err.response.status == 422){
         setFormError(err.response.data);
