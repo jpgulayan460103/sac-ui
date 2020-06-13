@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Form, Input, Select, DatePicker } from 'antd';
+import { Form, Input, Select, DatePicker, AutoComplete } from 'antd';
 import _forEach from 'lodash/forEach'
 import _isEmpty from 'lodash/isEmpty'
 import _debounce from 'lodash/debounce'
@@ -15,6 +15,7 @@ function mapStateToProps(state) {
     formData: state.hhead.formData,
     members: state.hhead.members,
     formStatus: state.hhead.formStatus,
+    trabahos: state.user.trabahos,
   };
 }
 
@@ -234,7 +235,13 @@ const HmemberForm = (props) => {
             </select>
           </Form.Item>
           <Form.Item  style={{ width: '10%' }} label={diplayLabel("Trabaho",props.memberIndex)} name="trabaho" {...displayErrors('trabaho')} onBlur={(e) => { setFormFields(e,'trabaho') }}>
-            <Input autoComplete="off" placeholder="trabaho" />
+            <AutoComplete
+              options={props.trabahos}
+              placeholder="Trabaho`"
+              filterOption={(inputValue, option) =>
+                option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+            />
           </Form.Item>
           <Form.Item  style={{ width: '9.5%' }} label={diplayLabel("Sektor",props.memberIndex)} name="sektor" {...displayErrors('sektor')}>
             <select placeholder="Secktor" value="" className="form-control form-control-sm" style={{height: "26px"}} onBlur={(e) => { setSelectionDefault(e) }}>

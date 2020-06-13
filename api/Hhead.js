@@ -43,6 +43,9 @@ export default {
   getBarangay(){
     return axios.get(`api/barangays/dropdown`);
   },
+  getTrabaho(){
+    return axios.get(`api/autocompletes/trabahos`);
+  },
   get(id){
     return axios.get(`api/barangay-officials/${id}`);
   },

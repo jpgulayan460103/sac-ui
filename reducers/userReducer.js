@@ -7,6 +7,7 @@ const initialState = () => {
     user: {},
     guidelineDrawer: false,
     exportData: {},
+    trabahos: [],
     exporting: false
   }
 }
@@ -44,6 +45,11 @@ export default function userReducer(state = initialState(), action) {
       return {
         ...state,
         exporting: action.data
+      }
+    case 'SET_TRABAHOS':
+      return {
+        ...state,
+        trabahos: action.data
       }
     case 'SET_USER':
       return {

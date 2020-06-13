@@ -1,7 +1,7 @@
 import React, { useState,useEffect} from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router'
-import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber, Modal, Badge} from 'antd';
+import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber, Modal, AutoComplete } from 'antd';
 import { ArrowLeftOutlined, SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import API from '../../api'
 import _forEach from 'lodash/forEach'
@@ -22,6 +22,12 @@ const { Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
+const options = [
+  { value: 'Burns Bay Road' },
+  { value: 'Downing Street' },
+  { value: 'Wall Street' },
+];
+
 
 function mapStateToProps(state) {
   return {
@@ -30,6 +36,7 @@ function mapStateToProps(state) {
     members: state.hhead.members,
     formStatus: state.hhead.formStatus,
     formType: state.hhead.formType,
+    trabahos: state.user.trabahos,
   };
 }
 const handleClick = () => {}
@@ -268,6 +275,9 @@ const HheadForm = (props) => {
         getProvinces();
       }
     }
+    if(_isEmpty(props.trabahos)){
+      getTrabaho()
+    }
   }, []);
   useEffect(() => {
     if(props.viewStatus == "edit"){
@@ -316,6 +326,25 @@ const HheadForm = (props) => {
       }]);
     }
   }, [props.formType]);
+
+  const getTrabaho = () => {
+    if(_isEmpty(props.trabahos)){
+      API.Hhead.getTrabaho()
+      .then(res => {
+        let trabaho_response = res.data.trabaho;
+        trabaho_response = trabaho_response.map(item => {
+          return {'value': item };
+        });
+        props.dispatch({
+          type: "SET_TRABAHOS",
+          data: trabaho_response
+        })
+      })
+      .catch(err => {})
+      .then(res => {})
+      ;
+    }
+  }
   const getProvinces = () => {
     API.Barangay.getProvinces()
     .then(res => {
@@ -843,7 +872,13 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Trabaho" name="trabaho" hasFeedback {...displayErrors('trabaho')} onBlur={(e) => { setFormFields(e,'trabaho') }} >
-            <Input autoComplete="off" placeholder="Trabaho" />
+          <AutoComplete
+            options={props.trabahos}
+            placeholder="Trabaho`"
+            filterOption={(inputValue, option) =>
+              option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+            }
+          />
           </Form.Item>
           <Form.Item style={{ width: '33%' }} label="Buwanang Kita" name="buwanang_kita" hasFeedback {...displayErrors('buwanang_kita')} onBlur={(e) => { setFormFields(e,'buwanang_kita') }} >
             <InputNumber min={0} autoComplete="off" placeholder="Buwanang Kita" style={{width: "100%"}}/>
