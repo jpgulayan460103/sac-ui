@@ -564,7 +564,7 @@ const HheadForm = (props) => {
     })
     .catch(err => {
       setSubmit(false);
-      if(err.response){
+      if(err.response.status == 422){
         props.dispatch({
           type: "HHEAD_FORM_ERROR",
           data: err.response.data.errors

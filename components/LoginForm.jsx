@@ -35,8 +35,10 @@ const LoginForm = props => {
       location.reload("/");
     })
     .catch(err => {
-      setFormError(err.response.data);
       setSubmit(false);
+      if(err.response.status == 422){
+        setFormError(err.response.data);
+      }
     })
     .then(res => {
       setSubmit(false);

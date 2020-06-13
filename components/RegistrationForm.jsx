@@ -105,8 +105,10 @@ const RegistrationForm = (props) => {
       setCity("");
     })
     .catch(err => {
-      setFormError(err.response.data.errors);
       setSubmit(false);
+      if(err.response.status == 422){
+        setFormError(err.response.data.errors);
+      }
     })
     .then(res => {
       setSubmit(false);
