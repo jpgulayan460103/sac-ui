@@ -271,6 +271,7 @@ const HheadTable = (props) => {
       title: 'Barcode',
       key: 'barcode_number',
       dataIndex: 'barcode_number',
+      width: 170,
     },
     {
       title: 'Name',
@@ -311,6 +312,7 @@ const HheadTable = (props) => {
       key: 'action',
       dataIndex: 'action',
       align: "right",
+      width: 170,
       render: (text, record, index) => (
         <>
           <Button title="View" onClick={() => { showHhead(record) }} key={`view-${record.id}`}><EyeOutlined /></Button>

@@ -1,7 +1,7 @@
 import React, { useState,useEffect} from 'react';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router'
-import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber, Modal} from 'antd';
+import { Form, Input, Button, Divider, Select, DatePicker, Typography, Checkbox, Radio, InputNumber, Modal, Badge} from 'antd';
 import { ArrowLeftOutlined, SearchOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import API from '../../api'
 import _forEach from 'lodash/forEach'
@@ -42,6 +42,193 @@ const layout = {
 const tailLayout = {
   wrapperCol: { offset: 8, span: 16 },
 };
+
+const teamLeaders = 
+[
+  {psgc: "112402001", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402002", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402003", teamLeader: "LANI CUDINO"},
+  {psgc: "112402056", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402197", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402174", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402004", teamLeader: "LANI CUDINO"},
+  {psgc: "112402175", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402176", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402005", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402006", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402007", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402009", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402010", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402012", teamLeader: "LANI CUDINO"},
+  {psgc: "112402177", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402013", teamLeader: "LANI CUDINO"},
+  {psgc: "112402143", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402144", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402145", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402146", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402147", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402148", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402149", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402150", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402151", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402152", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402134", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402153", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402154", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402155", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402156", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402157", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402158", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402159", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402160", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402161", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402162", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402135", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402163", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402164", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402165", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402166", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402167", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402168", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402169", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402170", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402171", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402172", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402136", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402173", teamLeader: "CHARITO BLANCO"},
+  {psgc: "112402137", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402138", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402139", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402140", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402141", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402142", teamLeader: "CELINA SERAPIO"},
+  {psgc: "112402014", teamLeader: "LANI CUDINO"},
+  {psgc: "112402015", teamLeader: "LANI CUDINO"},
+  {psgc: "112402016", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402017", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402018", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402019", teamLeader: "LANI CUDINO"},
+  {psgc: "112402020", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402178", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402021", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402022", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402023", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402024", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402026", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402027", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402028", teamLeader: "LANI CUDINO"},
+  {psgc: "112402029", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402030", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402031", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402032", teamLeader: "LANI CUDINO"},
+  {psgc: "112402033", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402179", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402034", teamLeader: "BONG BINONDO"},
+  {psgc: "112402035", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402036", teamLeader: "LANI CUDINO"},
+  {psgc: "112402037", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402038", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402039", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402040", teamLeader: "LANI CUDINO"},
+  {psgc: "112402041", teamLeader: "LANI CUDINO"},
+  {psgc: "112402180", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402042", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402043", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402044", teamLeader: "LANI CUDINO"},
+  {psgc: "112402045", teamLeader: "BONG BINONDO"},
+  {psgc: "112402047", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402181", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402182", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402048", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402183", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402049", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402184", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402050", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402185", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402051", teamLeader: "LANI CUDINO"},
+  {psgc: "112402052", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402053", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402054", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402055", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402186", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402187", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402057", teamLeader: "LANI CUDINO"},
+  {psgc: "112402058", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402059", teamLeader: "LANI CUDINO"},
+  {psgc: "112402060", teamLeader: "BONG BINONDO"},
+  {psgc: "112402061", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402062", teamLeader: "BONG BINONDO"},
+  {psgc: "112402188", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402063", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402064", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402065", teamLeader: "BONG BINONDO"},
+  {psgc: "112402066", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402067", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402068", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402069", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402070", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402071", teamLeader: "BONG BINONDO"},
+  {psgc: "112402072", teamLeader: "LANI CUDINO"},
+  {psgc: "112402073", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402074", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402078", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402075", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402077", teamLeader: "ANNE JICKAIN"},
+  {psgc: "112402189", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402079", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402080", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402081", teamLeader: "LANI CUDINO"},
+  {psgc: "112402082", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402083", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402086", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402087", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402088", teamLeader: "BONG BINONDO"},
+  {psgc: "112402089", teamLeader: "BONG BINONDO"},
+  {psgc: "112402090", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402091", teamLeader: "BONG BINONDO"},
+  {psgc: "112402092", teamLeader: "BONG BINONDO"},
+  {psgc: "112402190", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402097", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402098", teamLeader: "BONG BINONDO"},
+  {psgc: "112402099", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402191", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402192", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402100", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402193", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402101", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402102", teamLeader: "LANI CUDINO"},
+  {psgc: "112402104", teamLeader: "LANI CUDINO"},
+  {psgc: "112402105", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402106", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402107", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402108", teamLeader: "BONG BINONDO"},
+  {psgc: "112402110", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402112", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402113", teamLeader: "LANI CUDINO"},
+  {psgc: "112402114", teamLeader: "LANI CUDINO"},
+  {psgc: "112402115", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402116", teamLeader: "GLADYS CREDO"},
+  {psgc: "112402117", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402118", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402119", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402120", teamLeader: "JEROME GUMBAO"},
+  {psgc: "112402121", teamLeader: "BONG BINONDO"},
+  {psgc: "112402122", teamLeader: "MA. LOURDES RAFANAN"},
+  {psgc: "112402123", teamLeader: "LANI CUDINO"},
+  {psgc: "112402124", teamLeader: "CHANNIN PARIAN"},
+  {psgc: "112402125", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402126", teamLeader: "LANI CUDINO"},
+  {psgc: "112402127", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402128", teamLeader: "LANI CUDINO"},
+  {psgc: "112402194", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402129", teamLeader: "NELRIZA SANTAMARIA"},
+  {psgc: "112402198", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402195", teamLeader: "BONIFACIO LUMAAD"},
+  {psgc: "112402131", teamLeader: "SHAYNE SAMPIANO"},
+  {psgc: "112402196", teamLeader: "LOLITA ROBLE"},
+  {psgc: "112402133", teamLeader: "MA. LOURDES RAFANAN"},
+]
+
 const HheadForm = (props) => {
 
   const [formData, setFormData] = useState({});
@@ -51,6 +238,7 @@ const HheadForm = (props) => {
   const [cities, setCities] = useState([]);
   const [barangays, setBarangays] = useState([]);
   const [isLgu, setisLgu] = useState(false);
+  const [cellphoneNumberLen, setCellphoneNumberLen] = useState(0);
   const formRef = React.useRef();
   const secondFormRef = React.useRef();
   const isMountedRef = React.useRef(null);
@@ -258,7 +446,10 @@ const HheadForm = (props) => {
       case 'trabaho':
       case 'cellphone_number':
       case 'pinagtratrabahuhang_lugar':
-        value = value.trim() == "" ? "-" : value;
+        value = (value.trim() == "" || value.trim().toUpperCase() == "NONE" || value.trim().toUpperCase() == "NA" || value.trim().toUpperCase() == "N/A" || value.trim().toUpperCase() == "WALA") ? "-" : value;
+        break;
+      case 'pangalan_ng_lswdo':
+        value = setTeamLeader(value);
         break;
       case 'buwanang_kita':
         value = value.trim() == "" ? "0" : value;
@@ -338,23 +529,37 @@ const HheadForm = (props) => {
       }
     })
   }
+
+  const setTeamLeader = (value) => {
+    let selectedBarangay = barangays.filter(item => item.id == props.formData.barangay_id);
+    if(_isEmpty(selectedBarangay)){
+      return value;
+    }
+    selectedBarangay = selectedBarangay[0];
+    let selectedTeamLeader = teamLeaders.filter(item => item.psgc == selectedBarangay.barangay_psgc);
+    if(!_isEmpty(selectedTeamLeader)){
+      if(value.trim() == "-" || value.trim() == "--" || value.trim() == "---" || value.trim() == "" || value.trim().toUpperCase() == "NONE" || value.trim().toUpperCase() == "NA" || value.trim().toUpperCase() == "N/A" || value.trim().toUpperCase() == "WALA"){
+        return selectedTeamLeader[0].teamLeader;
+      }
+    }
+    return value;
+  }
   const formSubmit = _debounce(() => {
     setSubmit(true);
     let formData = props.formData;
     let members = props.members;
     API.Hhead.save(formData, members, props.formType)
     .then(res => {
+      setSubmit(false);
       Swal.fire({
         title: 'Success!',
-        text: 'Successfully saved the form.',
+        text: `${props.formData.barcode_number} - ${props.formData.last_name}, ${props.formData.first_name} ${props.formData.middle_name} ${props.formData.ext_name} has been successfully saved.`,
         icon: 'success',
         confirmButtonText: 'OK',
         onClose: () => {
-
+          resetForm();
         }
       })
-      setSubmit(false);
-      resetForm();
       
     })
     .catch(err => {
@@ -643,8 +848,8 @@ const HheadForm = (props) => {
           <Form.Item style={{ width: '33%' }} label="Buwanang Kita" name="buwanang_kita" hasFeedback {...displayErrors('buwanang_kita')} onBlur={(e) => { setFormFields(e,'buwanang_kita') }} >
             <InputNumber min={0} autoComplete="off" placeholder="Buwanang Kita" style={{width: "100%"}}/>
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Cellphone No" name="cellphone_number" hasFeedback {...displayErrors('cellphone_number')} onBlur={(e) => { setFormFields(e,'cellphone_number') }} >
-            <Input autoComplete="off" placeholder="Cellphone No" />
+          <Form.Item style={{ width: '33%' }} label={`Cellphone No: (characters ${cellphoneNumberLen})`} name="cellphone_number" hasFeedback {...displayErrors('cellphone_number')} onBlur={(e) => { setFormFields(e,'cellphone_number') }} >
+            <Input autoComplete="off" placeholder="Cellphone No" onChange={(e) => {setCellphoneNumberLen(e.target.value.length)}} />
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
@@ -1071,7 +1276,9 @@ const HheadForm = (props) => {
           <div style={{position: "absolute", width: "96%"}}>
           <div style={{paddingTop: "5px"}} className="float-right">
             <Button type="primary" onClick={() => addMember()}>
-              Add Member
+              <span className="space-x-1">
+              <span>Add Member, count: {membersCount}</span>
+              </span>
             </Button>  
             <Button type="danger" onClick={removeLastMember}>
               Remove Last Row
