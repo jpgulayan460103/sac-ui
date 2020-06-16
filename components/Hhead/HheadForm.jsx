@@ -1252,7 +1252,7 @@ const HheadForm = (props) => {
             </Form.Item>
         </Input.Group>
         <Divider />
-        { props.viewStatus == "edit" && (props.formData.allow_delete || props.user.role == "admin")  ? (
+        { props.viewStatus == "edit"  ? (
           <div style={{position: "absolute", width: "96%"}}>
           <div style={{paddingTop: "5px"}} className="float-right">
             <Button type="primary" onClick={() => addMember()}>

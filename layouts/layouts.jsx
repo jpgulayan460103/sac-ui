@@ -17,7 +17,7 @@ const Layouts = (props) => {
       <div className="main-layout-container">
         <div className="container">
           <div className="row justify-content-center align-items-center p-3">
-            {/* <img className="h-16" src="/images/logo.png" alt=""/> */}
+            <img className="h-16" src="/images/logo.png" alt=""/>
           </div>
           <div className="row">
             <div className="col-md-12">
