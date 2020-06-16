@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import API from '../../api'
-import { Typography, Table, Drawer, Button, Modal, Pagination, DatePicker, Input } from 'antd';
+import { Typography, Table, Drawer, Button, Modal, Pagination, DatePicker, Input, Select  } from 'antd';
 import HheadForm from './HheadForm'
 import _cloneDeep from 'lodash/cloneDeep'
 import _isEmpty from 'lodash/isEmpty'
@@ -21,6 +21,7 @@ const { confirm } = Modal;
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { Search } = Input;
+const { Option } = Select ;
 function mapStateToProps(state) {
   return {
     exportData: state.user.exportData,
@@ -35,16 +36,34 @@ const HheadTable = (props) => {
   const [drawerTitle, setDrawerTitle] = useState("");
   const [pagination, setPagination] = useState({});
   const [tableLoading, setTableLoading] = useState(true);
-  const [startDateFilter, setStartDateFilter] = useState("");
-  const [endDateFilter, setEndDateFilter] = useState("");
-  const [searchStringFilter, setSearchStringFilter] = useState("");
+  const [searchOptions, setSearchOptions] = useState({});
+  const [users, setUsers] = useState([]);
   useEffect(() => {
     getHouseholdHeads(1);
+    getUser();
     props.dispatch({
       type: "SET_INITIAL_HHEAD_STATE",
       data: {}
     });
   }, []);
+
+  const getUser = () => {
+    API.User.getUsers()
+    .then(res => {
+      setUsers(res.data.users.data);
+    })
+    .catch(res => {})
+    .then(res => {})
+    ;
+  }
+
+  const populateUsers = () => {
+    let items = [];
+    users.map(item => {
+      items.push(<Option value={item.id} key={item.id}>{`[${item.username}] ${item.name}`}</Option>);
+    })
+    return items;
+  }
 
   const [visible, setVisible] = useState(false);
   const showDrawer = () => {
@@ -58,9 +77,7 @@ const HheadTable = (props) => {
     .then(res => {
       let url = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
       let intiialSettings = {
-        startDate: startDateFilter,
-        endDate: endDateFilter,
-        query: searchStringFilter,
+        ...searchOptions,
         path: `${url}${res.data.path}`,
         filename: res.data.filename,
         totalPage: 0,
@@ -119,16 +136,11 @@ const HheadTable = (props) => {
     .then(res => {});
   }
 
-  const getHouseholdHeads = (currentPage = 1, searchString = "") => {
+  const getHouseholdHeads = (currentPage = 1) => {
     setTableLoading(true);
-    searchString = searchString == "" ? searchStringFilter : searchString;
     let options = {
+      ...searchOptions,
       page: currentPage,
-      query: searchString,
-    };
-    if(startDateFilter != ""){
-      options.startDate = startDateFilter;
-      options.endDate = endDateFilter;
     }
     API.Hhead.all(options)
     .then(res => {
@@ -237,24 +249,39 @@ const HheadTable = (props) => {
     setHheads(newData);
   }
 
-  const searchHhead = (searchString) => {
-    getHouseholdHeads(1, searchString);
-    setSearchStringFilter(searchString);
+  const queryString = (e) => {
+    let searchString = e.target.value;
+    setSearchOptions({
+      ...searchOptions,
+      query: searchString,
+    });
   }
   const paginationClick = (e) => {
     getHouseholdHeads(e);
   }
   const datePickerChange = (ranges) => {
     if(ranges == null){
-      setStartDateFilter("");
-      setEndDateFilter("");
+      setSearchOptions({
+        ...searchOptions,
+        startDate:"",
+        endDate:"",
+      });
       return true;
     }
     let [ startDate, endDate ] = ranges;
     startDate = moment.parseZone(startDate).format("YYYY-MM-DD");
     endDate = moment.parseZone(endDate).format("YYYY-MM-DD");
-    setStartDateFilter(startDate);
-    setEndDateFilter(endDate);
+    setSearchOptions({
+      ...searchOptions,
+      startDate:startDate,
+      endDate:endDate,
+    });
+  }
+  const selectUser = (e) => {
+    setSearchOptions({
+      ...searchOptions,
+      user_id:e,
+    });
   }
 
   const dataSource = hheads;
@@ -324,12 +351,21 @@ const HheadTable = (props) => {
       <br />
       <div className="space-x-2">
         <span>Search:</span>
-        <Search
-          placeholder="input search text"
-          onSearch={value => searchHhead(value)}
-          style={{ width: 200 }}
-        />
+        <Input placeholder="Search" onBlur={(e) => {queryString(e)}} style={{width: "150px"}} />
         <RangePicker onChange={(e) => {datePickerChange(e)}} />
+        { props.user.role == "admin" ? (
+          <>
+          <br />
+          <br />
+          <span>Users:</span>
+          <Select allowClear placeholder="Users" onChange={(e) => selectUser(e)} style={{ width: '270px' }} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+            { populateUsers() }
+          </Select>
+          </>
+        ) : "" }
+        <Button type="primary" onClick={() => {getHouseholdHeads(1)}}>
+          Search
+        </Button>
       </div>
       <br />
       <span className="space-x-1">
