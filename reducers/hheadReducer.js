@@ -7,11 +7,7 @@ const initialState = () => {
       bene_4ps: false,
       katutubo: false,
       bene_others: false,
-    },
-    members: {
-      0: {
-        type: "new",
-      }
+      members: []
     },
     formError: {},
     formType: "create",

@@ -14,6 +14,7 @@ import {
   EyeOutlined,
 } from '@ant-design/icons';
 import HheadExportProgress from './HheadExportProgress'
+import _debounce from 'lodash/debounce';
 
 
 const { confirm } = Modal;
@@ -52,7 +53,7 @@ const HheadTable = (props) => {
   const onClose = () => {
     setVisible(false);
   };
-  const exportData = () => {
+  const exportData = _debounce(() => {
     API.Hhead.export()
     .then(res => {
       let url = (process.env.NODE_ENV == "development" ? process.env.DEVELOPMENT_URL : process.env.PRODUCTION_URL);
@@ -79,7 +80,7 @@ const HheadTable = (props) => {
     .catch(err => {})
     .then(res => {})
     ;
-  }
+  }, 150)
 
   const processExport = (intiialSettings = {}) => {
     let exportSettings;
@@ -163,16 +164,8 @@ const HheadTable = (props) => {
       data: hhdata
     });
     props.dispatch({
-      type: "SET_HMEMBER_FORM_DATA",
-      data: hmembers
-    });
-    props.dispatch({
       type: "SET_HHEAD_FORM_TYPE",
       data: "edit"
-    });
-    props.dispatch({
-      type: "SET_HMEMBER_FORM_STATUS",
-      data: "old"
     });
     Router.push("/");
     setSelectedHhead(loadedData);

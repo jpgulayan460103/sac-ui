@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { Form, Input, Select, DatePicker, AutoComplete } from 'antd';
 import _forEach from 'lodash/forEach'
 import _isEmpty from 'lodash/isEmpty'
@@ -21,6 +21,7 @@ function mapStateToProps(state) {
 
 
 const HmemberForm = (props) => {
+  const dispatch = useDispatch()
   const memberFormRef = React.useRef();
   const [formData, setFormData] = useState({});
   const displayErrors = (field) => {
@@ -32,30 +33,12 @@ const HmemberForm = (props) => {
     }
   }
   useEffect(() => {
-    if(props.viewStatus == "edit"){
-      let clonedMemberData = _cloneDeep(props.members[props.memberIndex]);
-      memberFormRef.current.setFieldsValue({
-        ...clonedMemberData
-      });
-      setFormData(clonedMemberData);
-    }
-  }, [props.members[props.memberIndex]]);
-  useEffect(() => {
-    let last_name = props.formData.last_name;
-    setFormFields(last_name, 'last_name', true);
-  }, [props.formData.last_name]);
-  useEffect(() => {
-    if(props.viewStatus == "view" || props.formType == "edit"){
-      let viewMemberData = _cloneDeep(props.viewData);
-      memberFormRef.current.setFieldsValue({
-        ...viewMemberData
-      });
-      setFormData(viewMemberData);
-    }
-  }, [props.viewData]);
-  useEffect(() => {
-    resetForm();
-  }, [props.formStatus]);
+    let newForm = _cloneDeep(props.memberData);
+    memberFormRef.current.setFieldsValue({
+      ...newForm
+    });
+    
+  }, [props.memberData]);
   const resetForm = () => {
     memberFormRef.current.resetFields();
   }
@@ -170,17 +153,17 @@ const HmemberForm = (props) => {
     let index = props.memberIndex;
     let memberData = [];
     transformedValue['type']  = "old";
-    memberData[index] = {
-        ...props.members[index],
-        ...transformedValue
-    };
-    props.dispatch({
-      type: "SET_HMEMBER_FORM_DATA",
+    memberData = props.formData.members[index];
+    let members = props.formData.members;
+    
+    members[index] = {...props.formData.members[index],...transformedValue};
+    dispatch({
+      type: "SET_HHEAD_FORM_DATA",
       data: {
-        ...props.members,
-        ...memberData
+        ...props.formData,
+        members: members
       }
-    }) 
+    })
   }
   const diplayLabel = (label, index) => {
     if(index == 0){

@@ -15,6 +15,7 @@ import Swal from 'sweetalert2/dist/sweetalert2.js'
 import Router from 'next/router'
 import HmemberForm from './HmemberForm'
 import ls from 'local-storage'
+import forEach from 'lodash/forEach';
 
 
 const { confirm } = Modal;
@@ -33,10 +34,10 @@ function mapStateToProps(state) {
   return {
     formData: state.hhead.formData,
     formError: state.hhead.formError,
-    members: state.hhead.members,
     formStatus: state.hhead.formStatus,
     formType: state.hhead.formType,
     trabahos: state.user.trabahos,
+    user: state.user.user,
   };
 }
 const handleClick = () => {}
@@ -240,7 +241,7 @@ const HheadForm = (props) => {
 
   const [formData, setFormData] = useState({});
   const [submit, setSubmit] = useState(false);
-  const [membersCount, setMembersCount] = useState(1);
+  const [isTouched, setIsTouched] = useState(false);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [barangays, setBarangays] = useState([]);
@@ -300,7 +301,6 @@ const HheadForm = (props) => {
         barangay_name: clonedHheadData.barangay.barangay_name,
         id: clonedHheadData.barangay.id,
       }]);
-      setMembersCount(clonedHheadData.members.length);
       formRef.current.setFieldsValue({
         ...clonedHheadData
       });
@@ -313,9 +313,6 @@ const HheadForm = (props) => {
     if(props.formType == "edit"){
       isMountedRef.current = true;
       let clonedHheadData = props.formData;
-      // getCities(clonedHheadData.barangay.province_psgc)
-      // getBarangays(clonedHheadData.barangay.city_psgc)
-
       setCities([{
         city_name: clonedHheadData.barangay.city_name,
         city_psgc: clonedHheadData.barangay.city_psgc,
@@ -457,17 +454,9 @@ const HheadForm = (props) => {
     if(props.viewStatus == "view"){
       return false;
     }
-    if(props.formStatus == "new"){
-      props.dispatch({
-        type: "SET_HMEMBER_FORM_STATUS",
-        data: "old"
-      })
-    }
     let transformedValue = {};
     let key = field;
     let value =  selectValue ? e : e.target.value;
-    
-
     switch (key) {
       case 'tirahan':
       case 'kalye':
@@ -549,6 +538,12 @@ const HheadForm = (props) => {
         transformedValue['sektor']  = "";
       }
     }
+    let members = props.formData.members;
+    if(members.length == 0 && key == "last_name"){
+      transformedValue['members'] = [{
+        last_name: value.toUpperCase()
+      }];
+    }
     let formData  = props.formData;
     props.dispatch({
       type: "SET_HHEAD_FORM_DATA",
@@ -576,8 +571,7 @@ const HheadForm = (props) => {
   const formSubmit = _debounce(() => {
     setSubmit(true);
     let formData = props.formData;
-    let members = props.members;
-    API.Hhead.save(formData, members, props.formType)
+    API.Hhead.save(formData, formData.members, props.formType)
     .then(res => {
       setSubmit(false);
       Swal.fire({
@@ -646,6 +640,7 @@ const HheadForm = (props) => {
         bene_others:false,
       }
     }
+    newForm.members = [];
     props.dispatch({
       type: "SET_HHEAD_FORM_DATA",
       data: newForm
@@ -658,17 +653,6 @@ const HheadForm = (props) => {
     secondFormRef.current.setFieldsValue({
       ...newForm
     });
-    if(membersCount>0){
-      setMembersCount(1);
-      props.dispatch({
-        type: "ADD_HMEMBERS",
-        data: {
-          0:{
-            type: "new",
-          }
-        }
-      })
-    }
     props.dispatch({
       type: "SET_HHEAD_FORM_TYPE",
       data: "create"
@@ -704,80 +688,41 @@ const HheadForm = (props) => {
   }
 
   const addMember = () => {
-    setMembersCount(membersCount + 1);
-    let members = props.members;
-    members[membersCount] = {
-      type: "new",
-    };
     props.dispatch({
-      type: "ADD_HMEMBERS",
+      type: "SET_HHEAD_FORM_DATA",
       data: {
-        ...props.members,
-        ...members
+        ...props.formData,
+        members: [
+          ...props.formData.members,
+          {
+            last_name: props.formData.last_name
+          }
+        ]
       }
-    }) 
+    })
   }
   const removeLastMember = () => {
-    if(membersCount > 0){
-      setMembersCount(membersCount - 1);
-      let membersObjectCount = Object.keys(props.members).length;
-      
-      let members = props.members;
-      delete members[membersObjectCount-1];
-      // members[membersObjectCount] = {};
-      props.dispatch({
-        type: "ADD_HMEMBERS",
-        data: {
-          ...props.members,
-          ...members
-        }
-      }) 
-    }
+    let remainingMembers = props.formData.members;
+    remainingMembers.pop();
+    props.dispatch({
+      type: "SET_HHEAD_FORM_DATA",
+      data: {
+        ...props.formData,
+        members: remainingMembers
+      }
+    })
   }
 
   const populateMembers = () => {
     let items = [];
-    let membersObjectCount = 0;
     if(props.viewStatus == "edit"){
-      membersObjectCount = Object.keys(props.members).length;
+      props.formData.members.map((memberData, index) => {
+        items.push(<HmemberForm memberIndex={index} key={index} formType={props.formType} memberData={memberData} />);    
+      })
     }else{
-      membersObjectCount = props.viewData.members.length;
-    }
-    for (let index = 0; index < membersObjectCount; index++) {
-      let memberData = {};
-      if(props.viewStatus == "view"){
-        memberData = _cloneDeep(props.viewData.members[index]);
-      }
-      if(props.formType == "edit"){
-        memberData = _cloneDeep(props.members[index]);
-      }
-      items.push(<HmemberForm memberIndex={index} key={index} formType={props.formType} viewData={ memberData } viewStatus={props.viewStatus} />);    
-    }
-    if(props.members == 0){
-      return (
-        <Input.Group compact>
-          <Form.Item  style={{ width: '10%' }} label="Last Name">
-          </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label="First Name">
-          </Form.Item>
-          <Form.Item  style={{ width: '10%' }} label="Middle Name">
-          </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label="Ext">
-          </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="Relasyon">
-          </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="Kapanganakan">
-          </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label="Kasarian">
-          </Form.Item>
-          <Form.Item  style={{ width: '15%' }} label="Trabaho">
-          </Form.Item>
-          <Form.Item  style={{ width: '9.5%' }} label="Sektor">
-          </Form.Item>
-          <Form.Item  style={{ width: '5%' }} label="Kondisyon ng Kalusugan">
-          </Form.Item>
-        </Input.Group>
-      )
+      props.viewData.members.map((memberData, index) => {
+        items.push(<HmemberForm memberIndex={index} key={index} formType={props.formType} memberData={memberData} />);    
+      })
     }
     return items;
   }
@@ -1307,12 +1252,12 @@ const HheadForm = (props) => {
             </Form.Item>
         </Input.Group>
         <Divider />
-        { props.viewStatus == "edit" && props.formType == "create" ? (
+        { props.viewStatus == "edit" && (props.formData.allow_delete || props.user.role == "admin")  ? (
           <div style={{position: "absolute", width: "96%"}}>
           <div style={{paddingTop: "5px"}} className="float-right">
             <Button type="primary" onClick={() => addMember()}>
               <span className="space-x-1">
-              <span>Add Member, count: {membersCount}</span>
+              <span>Add Member, count: { props.formData.members.length }</span>
               </span>
             </Button>  
             <Button type="danger" onClick={removeLastMember}>
