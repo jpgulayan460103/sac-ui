@@ -27,7 +27,7 @@ const Encoded = (props) => {
       });
       setSummary(response);
       let total = response.reduce((accumulator, currentValue) => {
-        return accumulator + currentValue.total_encoded;
+        return accumulator + parseInt(currentValue.total_encoded);
       }, 0);
       setTotalRecord(total);
     })
