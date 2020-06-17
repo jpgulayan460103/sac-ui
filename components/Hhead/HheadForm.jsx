@@ -299,7 +299,7 @@ const HheadForm = (props) => {
       }]);
       setBarangays([{
         barangay_name: clonedHheadData.barangay.barangay_name,
-        id: clonedHheadData.barangay.id,
+        id: clonedHheadData.barangay_id,
       }]);
       formRef.current.setFieldsValue({
         ...clonedHheadData
@@ -319,7 +319,7 @@ const HheadForm = (props) => {
       }]);
       setBarangays([{
         barangay_name: clonedHheadData.barangay.barangay_name,
-        id: clonedHheadData.barangay.id,
+        id: clonedHheadData.barangay_id,
       }]);
     }
   }, [props.formType]);
@@ -386,10 +386,12 @@ const HheadForm = (props) => {
     ;;
   }
 
-  const clearBarangaySelection = () =>{
+  const clearBarangaySelection = (e) =>{
     if(props.formType=="edit"){
-      getCities(props.formData.probinsya)
-      getBarangays(props.formData.lungsod)
+      if(typeof e == "undefined"){
+        getCities(props.formData.probinsya)
+        getBarangays(props.formData.lungsod)
+      }
     }
   }
 
@@ -801,7 +803,7 @@ const HheadForm = (props) => {
         </Input.Group>
         <Input.Group compact>
           <Form.Item style={{ width: '33%' }} label="Barangay" name="barangay_id" {...displayErrors('barangay_id')}>
-              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={() => {clearBarangaySelection()} }>
+              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {clearBarangaySelection(e)} }>
                 { populateBarangays() }
               </Select>
           </Form.Item>

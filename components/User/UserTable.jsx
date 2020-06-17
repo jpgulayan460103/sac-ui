@@ -108,19 +108,22 @@ const UserTable = (props) => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      sorter: (a, b) => { return a.name.localeCompare(b.name)},
     },
     {
       title: 'Username',
       dataIndex: 'username',
       key: 'username',
+      sorter: (a, b) => { return a.username.localeCompare(b.username)},
     },
     {
       title: 'Position',
       key: 'position',
       filters: [
-        { text: 'Field Staff', value: 'field_staff' },
-        { text: 'LGU Staff', value: 'lgu_staff' },
+        { text: 'Field Staff', value: 'Field Staff' },
+        { text: 'LGU Staff', value: 'LGU Staff' },
       ],
+      onFilter: (value, record) => record.position.indexOf(value) === 0,
       render: (text, record) => (
         <span>
           {record.position}
@@ -141,6 +144,7 @@ const UserTable = (props) => {
         { text: 'Active', value: 'active' },
         { text: 'Inactive', value: 'inactive' },
       ],
+      onFilter: (value, record) => record.status.indexOf(value) === 0,
       render: (text, record) => (
         <span>
           <Button onClick={() => { editUser(record) } }>
@@ -161,34 +165,6 @@ const UserTable = (props) => {
   
   const handleTableChange = (pagination, filters, sorter) => {
     console.log(filters);
-    
-    let currentUsers = usersTable;
-    if(filters.status){
-      let has_active = filters.status.filter(item => item == "active")
-      let has_inactive = filters.status.filter(item => item == "inactive")
-      has_active = !_isEmpty(has_active);
-      has_inactive = !_isEmpty(has_inactive);
-      if(has_active && has_inactive){
-        setUsersTable(currentUsers);
-      }else if(has_active){
-        setUsersTable(currentUsers.filter(item => item.confirmed == 1))
-      }else{
-        setUsersTable(currentUsers.filter(item => item.confirmed == 0))
-      }
-    }
-    if(filters.position){
-      let has_field_staff = filters.position.filter(item => item == "field_staff")
-      let has_lgu_staff = filters.position.filter(item => item == "lgu_staff")
-      has_field_staff = !_isEmpty(has_field_staff);
-      has_lgu_staff = !_isEmpty(has_lgu_staff);
-      if(has_field_staff && has_lgu_staff){
-        setUsersTable(currentUsers);
-      }else if(has_field_staff){
-        setUsersTable(currentUsers.filter(item => item.position == "Field Staff"))
-      }else{
-        setUsersTable(currentUsers.filter(item => item.position == "LGU Staff"))
-      }
-    }
   }
   return (
     <div>

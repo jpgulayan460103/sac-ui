@@ -18,7 +18,7 @@ import _debounce from 'lodash/debounce';
 
 
 const { confirm } = Modal;
-const { Title } = Typography;
+const { Title, Link } = Typography;
 const { RangePicker } = DatePicker;
 const { Search } = Input;
 const { Option } = Select ;
@@ -376,7 +376,9 @@ const HheadTable = (props) => {
             <HheadExportProgress />
             </span>
           ) : (
-            <a href="#!" onClick={() => {exportData()}}>Export Data</a>
+            <Link href="#!" onClick={() => {exportData()}}>
+              Export Data
+            </Link>
           )) }
         </span>
       <Table dataSource={dataSource} columns={columns} pagination={false} loading={tableLoading} />
