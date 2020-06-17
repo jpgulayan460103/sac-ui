@@ -388,8 +388,8 @@ const HheadForm = (props) => {
 
   const clearBarangaySelection = () =>{
     if(props.formType=="edit"){
-      getCities(props.formData.barangay.province_psgc)
-      getBarangays(props.formData.barangay.city_psgc)
+      getCities(props.formData.probinsya)
+      getBarangays(props.formData.lungsod)
     }
   }
 
