@@ -41,10 +41,10 @@ const HheadTable = (props) => {
   useEffect(() => {
     getHouseholdHeads(1);
     getUser();
-    props.dispatch({
-      type: "SET_INITIAL_HHEAD_STATE",
-      data: {}
-    });
+    // props.dispatch({
+    //   type: "SET_INITIAL_HHEAD_STATE",
+    //   data: {}
+    // });
   }, []);
 
   const getUser = () => {
