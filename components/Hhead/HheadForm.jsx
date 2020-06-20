@@ -392,7 +392,7 @@ const HheadForm = (props) => {
         getCities(props.formData.probinsya)
         getBarangays(props.formData.lungsod)
       }
-    }
+    }    
   }
 
   const populateProvinces = () => {
@@ -539,6 +539,14 @@ const HheadForm = (props) => {
       if(props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina"){
         transformedValue['sektor']  = "";
       }
+    }
+    if(key == "barangay_id"){
+      let subdistrict = [];
+        subdistrict = barangays.filter(item => item.id == value);
+        if(!_isEmpty(subdistrict)){
+          subdistrict = subdistrict[0];
+          transformedValue["subdistrict"] = subdistrict.subdistrict;
+        }
     }
     let members = props.formData.members;
     if(members.length == 0 && key == "last_name"){
@@ -807,8 +815,8 @@ const HheadForm = (props) => {
                 { populateBarangays() }
               </Select>
           </Form.Item>
-          <Form.Item style={{ width: '33%' }} label="Rehiyon" name="rehiyon" hasFeedback {...displayErrors('rehiyon')} onBlur={(e) => { setFormFields(e,'rehiyon') }} >
-            <Input autoComplete="off" placeholder="Rehiyon" value="XI" disabled/>
+          <Form.Item style={{ width: '33%' }} label="District" name="subdistrict" hasFeedback {...displayErrors('rehiyon')} onBlur={(e) => { setFormFields(e,'rehiyon') }} >
+            <Input autoComplete="off" placeholder="District" disabled/>
           </Form.Item>
           <Form.Item style={{ width: '23%' }} label="Kapanganakan (MM/DD/YYYY)" name="kapanganakan" hasFeedback {...displayErrors('kapanganakan')} onBlur={(e) => { setFormFields(e,'kapanganakan') }} >
             <DatePicker style={{ width: '100%' }} format={"MM/DD/YYYY"} />

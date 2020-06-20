@@ -206,12 +206,12 @@ const HheadTable = (props) => {
     clonedHheadData.katutubo = clonedHheadData.katutubo == "Y" ? true : false;
     clonedHheadData.sac_number = pad(parseInt(clonedHheadData.sac_number), 8); ;
     clonedHheadData.bene_others = clonedHheadData.bene_others == "Y" ? true : false;
-    clonedHheadData.kapanganakan = moment.parseZone(clonedHheadData.kapanganakan);
-    clonedHheadData.petsa_ng_pagrehistro = moment.parseZone(clonedHheadData.petsa_ng_pagrehistro);
+    clonedHheadData.kapanganakan = moment.parseZone(clonedHheadData.kapanganakan).utc();
+    clonedHheadData.petsa_ng_pagrehistro = moment.parseZone(clonedHheadData.petsa_ng_pagrehistro).utc();
     clonedHheadData.age = getAge(clonedHheadData.kapanganakan.format("YYYY/MM/DD"));
     setDrawerTitle(clonedHheadData.barcode_number);
     clonedHheadData.members.data.map(member => {
-      member.kapanganakan = moment.parseZone(member.kapanganakan);
+      member.kapanganakan = moment.parseZone(member.kapanganakan).utc();
       member.age = getAge(member.kapanganakan.format("YYYY/MM/DD"));
       return member; 
     })
