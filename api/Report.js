@@ -11,8 +11,8 @@ export default {
       return axios.post(`api/users`,formdata);
     }
   },
-  encoded(){
-    return axios.get(`api/reports/encoding`);
+  encoded(type){
+    return axios.get(`api/reports/encoding/${type}`);
   },
   logout(){
     return axios.post(`api/logout`);

@@ -282,13 +282,14 @@ const RegistrationForm = (props) => {
           >
             <Select style={{ width: "100%" }} placeholder="Position" onSelect={(e) => {setUserPosition(e)}} disabled={props.type=="user"}>
               <Option value="Field Staff">Field Staff</Option>
-              <Option value="LGU Staff">LGU Staff</Option>
+              <Option value="LGU Barangay Staff">LGU Barangay Staff</Option>
+              <Option value="LGU Municipality Staff">LGU Municipality Staff</Option>
             </Select>
           </Form.Item>
 
         { props.type == "registration" || props.type == "update" ? (
           <>
-          { (userPosition== "LGU Staff") ? (
+          { (userPosition== "LGU Barangay Staff" || userPosition == "LGU Municipality Staff") ? (
             <>
             <Form.Item
               label="Province"
@@ -310,17 +311,18 @@ const RegistrationForm = (props) => {
                   { populateCities() }
                 </Select>
             </Form.Item>
-            
-            <Form.Item
-              label="Barangay"
-              name="barangay_id"
-              {...displayErrors('barangay_id')}
-              rules={[{ required: true, message: 'Please select your position' }]}
-            >
-              <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {formSetBarangay(e)}  }>
-                { populateBarangays() }
-              </Select>
-            </Form.Item>
+            { (userPosition == "LGU Municipality Staff") ? "" : (
+              <Form.Item
+                label="Barangay"
+                name="barangay_id"
+                {...displayErrors('barangay_id')}
+                rules={[{ required: true, message: 'Please select your position' }]}
+              >
+                <Select allowClear placeholder="Barangay" style={{ width: '100%' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {formSetBarangay(e)}  }>
+                  { populateBarangays() }
+                </Select>
+              </Form.Item>
+            ) }
             </>
           ) : "" }
           </>

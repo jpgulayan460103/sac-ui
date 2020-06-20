@@ -121,18 +121,25 @@ const UserTable = (props) => {
       key: 'position',
       filters: [
         { text: 'Field Staff', value: 'Field Staff' },
-        { text: 'LGU Staff', value: 'LGU Staff' },
+        { text: 'LGU Barangay Staff', value: 'LGU Barangay Staff' },
+        { text: 'LGU Municipality Staff', value: 'LGU Municipality Staff' },
       ],
       onFilter: (value, record) => record.position.indexOf(value) === 0,
       render: (text, record) => (
         <span>
           {record.position}
-          { record.position == "LGU Staff" ? (
+          {record.position == "LGU Barangay Staff" ? (
             <>
               <br />
               {`${record.barangay.barangay_name}, ${record.barangay.city_name}`}
             </>
-          ) : "" }
+          ) : ""}
+          {record.position == "LGU Municipality Staff" ? (
+            <>
+              <br />
+              {`${record.barangay.city_name}, ${record.barangay.province_name}`}
+            </>
+          ) : ""}
         </span>
       ),
     },

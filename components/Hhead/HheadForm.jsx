@@ -246,6 +246,7 @@ const HheadForm = (props) => {
   const [cities, setCities] = useState([]);
   const [barangays, setBarangays] = useState([]);
   const [isLgu, setisLgu] = useState(false);
+  const [isLguMuni, setisLguMuni] = useState(false);
   const [cellphoneNumberLen, setCellphoneNumberLen] = useState(0);
   const formRef = React.useRef();
   const secondFormRef = React.useRef();
@@ -254,8 +255,12 @@ const HheadForm = (props) => {
     let user = ls('auth');
     if(user){
       let is_lgu = user.barangay_id != null
+      let is_muni_lgu = user.position == "LGU Municipality Staff"
       if(is_lgu){
         setisLgu(true);
+        if(is_muni_lgu){
+          setisLguMuni(true);
+        }
         let preSetBarangay = {};
         preSetBarangay.probinsya = user.barangay.province_psgc;
         preSetBarangay.lungsod = user.barangay.city_psgc;
@@ -370,13 +375,13 @@ const HheadForm = (props) => {
     ;;
   }
   const getBarangays = (city_psgc) => {
-    if(!isLgu){
+    if(!isLgu || isLguMuni){
       setBarangays([]);
     }
     let province_psgc = props.formData.probinsya;
     API.Barangay.getBarangays(province_psgc,city_psgc)
     .then(res => {
-      if(!isLgu){
+      if(!isLgu || isLguMuni){
         setBarangays(res.data.barangays);
       }
     })
@@ -638,6 +643,7 @@ const HheadForm = (props) => {
     if(mode == "retain"){
       newForm.probinsya = props.formData.probinsya;
       newForm.lungsod = props.formData.lungsod;
+      newForm.subdistrict = props.formData.subdistrict;
       newForm.barangay_id = props.formData.barangay_id;
       newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
       newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;

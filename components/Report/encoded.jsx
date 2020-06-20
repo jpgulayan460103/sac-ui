@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Table, Typography } from 'antd';
 import API from '../../api'
+import { Button, Radio } from 'antd';
 
 const { Title } = Typography;
 
@@ -16,9 +17,10 @@ const Encoded = (props) => {
     getEncodedSummary();
   }, []);
   const [summary, setSummary] = useState([]);
+  const [summaryType, setSummaryType] = useState("province");
   const [totalRecord, setTotalRecord] = useState(0);
-  const getEncodedSummary = () => {
-    API.Report.encoded()
+  const getEncodedSummary = (type = 'province') => {
+    API.Report.encoded(type)
     .then(res => {
       let response = res.data.encoded;
       response.map(item => {
@@ -58,10 +60,23 @@ const Encoded = (props) => {
       key: 'total_encoded',
     },
   ];
+
+  const selectType = (e) => {
+    let type = e.target.value;
+    setSummaryType(type);
+    getEncodedSummary(type);
+  }
   
   return (
     <div>
       <Title style={{textAlign: "center"}}>Encoding Report</Title>
+      <Radio.Group value={summaryType} onChange={ (e) => { selectType(e) } }>
+        <Radio.Button value="province">Province</Radio.Button>
+        <Radio.Button value="city">City/Municipality</Radio.Button>
+        <Radio.Button value="barangay">Barangay</Radio.Button>
+      </Radio.Group>
+      <br />
+      <br />
       <Table dataSource={dataSource} columns={columns} footer={() => `Total Encoded : ${totalRecord}`} />
     </div>
   );
