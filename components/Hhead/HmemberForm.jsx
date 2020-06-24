@@ -130,7 +130,6 @@ const HmemberForm = (props) => {
         let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
         transformedValue['age'] = age;
         if(age < 0){
-          transformedValue[key] = moment().utc();
           transformedValue['age'] = 0;
         }else if((age<8 || age>55) && (formData.sektor == "B - Buntis" || formData.sektor == "C - Nagpapasusong Ina")){
           transformedValue['sektor'] = "";

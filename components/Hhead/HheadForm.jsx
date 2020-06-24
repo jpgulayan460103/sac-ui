@@ -451,10 +451,12 @@ const HheadForm = (props) => {
     }    
   }
 
-  const setSelectionDefault = (e) => {
+  const setSelectionDefault = (e, form="basic_") => {
+    console.log(e.target);
+    
     let key = e.target.id;
     let value = e.target.value;
-    key = key.replace("basic_", "")
+    key = key.replace(form, "")
     setFormFields(value, key, true);
   }
   const setFormFields = (e, field, selectValue = false) => {
@@ -525,7 +527,6 @@ const HheadForm = (props) => {
         let age = getAge(transformedValue[key].format("YYYY/MM/DD"));
         transformedValue['age'] = age;
         if(age < 0){
-          transformedValue[key] = moment().utc();
           transformedValue['age'] = 0;
         }else if((age<8 || age>55) && (props.formData.sektor == "B - Buntis" || props.formData.sektor == "C - Nagpapasusong Ina")){
           transformedValue['sektor'] = "";
@@ -648,6 +649,7 @@ const HheadForm = (props) => {
       newForm.pangalan_ng_punong_barangay = props.formData.pangalan_ng_punong_barangay;
       newForm.pangalan_ng_lswdo = props.formData.pangalan_ng_lswdo;
       newForm.petsa_ng_pagrehistro = props.formData.petsa_ng_pagrehistro;
+      newForm.sap_type = props.formData.sap_type;
     }else{
       newForm = {
         bene_uct:false,
@@ -757,7 +759,7 @@ const HheadForm = (props) => {
           <Form.Item  style={{ width: '20%' }} label="Gitnang Pangalan" name="middle_name" hasFeedback {...displayErrors('middle_name')} onBlur={(e) => { setFormFields(e,'middle_name') }} >
             <Input autoComplete="off" placeholder="Gitnang Pangalan" />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }} label="Ext" name="ext_name" hasFeedback {...displayErrors('ext_name')} onBlur={(e) => { setFormFields(e,'ext_name') }} >
+          <Form.Item  style={{ width: '20%' }} label="Ext Name (SR, JR, I, II, etc)" name="ext_name" hasFeedback {...displayErrors('ext_name')} onBlur={(e) => { setFormFields(e,'ext_name') }} >
             <Input autoComplete="off" placeholder="Ext" />
           </Form.Item>
           <Form.Item  style={{ width: '19.3%' }} label="Kasarian" name="kasarian" {...displayErrors('kasarian')} onBlur={(e) => { setFormFields(e,'kasarian') }} >
@@ -1287,7 +1289,7 @@ const HheadForm = (props) => {
       { populateMembers() }
       <Divider />
 
-      <Form ref={secondFormRef} name="basic" onFinish={formSubmit} size="small" >
+      <Form ref={secondFormRef} name="basic2" onFinish={formSubmit} size="small" >
         <Input.Group compact>
           <Form.Item  style={{ width: '20%' }} label="Pangalan ng Punong Barangay" name="pangalan_ng_punong_barangay" hasFeedback {...displayErrors('pangalan_ng_punong_barangay')} onBlur={(e) => { setFormFields(e,'pangalan_ng_punong_barangay') }} >
             <Input autoComplete="off" placeholder="Pangalan ng Punong Barangay" />
@@ -1306,11 +1308,18 @@ const HheadForm = (props) => {
           </Form.Item>
         </Input.Group>
         <Input.Group compact>
-          <Form.Item  style={{ width: '80%' }} label="Remarks" name="remarks" onBlur={(e) => { setFormFields(e,'remarks') }} >
-            <TextArea rows={4} placeholder="Remarks" />
+          <Form.Item  style={{ width: '60%' }} label="Remarks" name="remarks" onBlur={(e) => { setFormFields(e,'remarks') }} >
+            <TextArea rows={4} placeholder="Remarks" autoSize={{ minRows: 1, maxRows: 4 }} />
           </Form.Item>
-          <Form.Item  style={{ width: '20%' }}>
-          <div className="d-flex justify-content-center mt-10">
+          <Form.Item style={{ width: '20%' }} label="Type of SAP" name="sap_type" hasFeedback {...displayErrors('sap_type')}>
+            <select placeholder="Type" className="form-control form-control-sm" style={{height: "26px"}} onBlur={(e) => {setSelectionDefault(e, "basic2_")}} >
+              <option value="">Select Type</option>
+              <option value="REGULAR">Regular SAP</option>
+              <option value="LEFTOUT">Leftout SAP</option>
+            </select>
+          </Form.Item>
+          <Form.Item style={{ width: '20%' }}>
+          <div className="d-flex justify-content-center mt-8">
           { props.viewStatus == "edit" ? (
             <React.Fragment>
               <Button size="large" type="primary" htmlType="submit" form="basic" disabled={submit} loading={submit}>
@@ -1326,6 +1335,13 @@ const HheadForm = (props) => {
         </Input.Group>
       </Form>
       <Divider />
+      { props.viewStatus == "edit" ? (
+            <React.Fragment>
+              <Button style={{visibility: "hidden"}} size="large" type="primary" htmlType="submit" form="basic2" disabled={submit} loading={submit}>
+                Save Form
+              </Button>
+            </React.Fragment>
+          ) : "" }
       <br />
       <br />
       
