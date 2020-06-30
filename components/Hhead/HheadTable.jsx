@@ -38,14 +38,96 @@ const HheadTable = (props) => {
   const [tableLoading, setTableLoading] = useState(true);
   const [searchOptions, setSearchOptions] = useState({});
   const [users, setUsers] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [barangay, setBarangay] = useState("");
   useEffect(() => {
     getHouseholdHeads(1);
     getUser();
+    getProvinces();
     // props.dispatch({
     //   type: "SET_INITIAL_HHEAD_STATE",
     //   data: {}
     // });
   }, []);
+
+  const getProvinces = () => {
+    API.Barangay.getProvinces()
+    .then(res => {
+      setProvinces(res.data.provinces);
+    })
+    .catch(res => {
+    })
+    .then(res => {})
+    ;;
+  }
+  const getCities = (e) => {
+    setCities([]);
+    if(typeof e == "undefined"){
+      setProvince("");
+      setSearchOptions({
+        ...searchOptions,
+        province_psgc: "",
+      });
+    }else{
+      setProvince(e);
+      setSearchOptions({
+        ...searchOptions,
+        province_psgc: e,
+      });
+    }
+    API.Barangay.getCities(e)
+    .then(res => {
+      setCities(res.data.cities);
+    })
+    .catch(res => {
+    })
+    .then(res => {})
+    ;;
+  }
+  const getBarangays = (city) => {
+    setBarangays([]);
+    if(typeof city == "undefined"){
+      setCity("");
+      setSearchOptions({
+        ...searchOptions,
+        city_psgc: "",
+      });
+    }else{
+      setCity(city);
+      setSearchOptions({
+        ...searchOptions,
+        city_psgc: city,
+      });
+    }
+    API.Barangay.getBarangays(province,city)
+    .then(res => {
+      setBarangays(res.data.barangays);
+    })
+    .catch(res => {
+    })
+    .then(res => {})
+    ;;
+  }
+
+  const formSetBarangay = (e) => {
+    if(typeof e == "undefined"){
+      setBarangay("");
+      setSearchOptions({
+        ...searchOptions,
+        barangay_psgc: "",
+      });
+    }else{
+      setBarangay(e);
+      setSearchOptions({
+        ...searchOptions,
+        barangay_psgc: e,
+      });
+    }
+  }
 
   const getUser = () => {
     API.User.getUsers()
@@ -344,6 +426,28 @@ const HheadTable = (props) => {
     },
   ];
 
+  const populateProvinces = () => {
+    let items = [];
+    provinces.map(item => {
+      items.push(<Option value={item.province_psgc} key={item.province_psgc}>{item.province_name}</Option>);
+    })
+    return items;
+  }
+  const populateCities = () => {
+    let items = [];
+    cities.map(item => {
+      items.push(<Option value={item.city_psgc} key={item.city_psgc}>{item.city_name}</Option>);
+    })
+    return items;
+  }
+  const populateBarangays = () => {
+    let items = [];
+    barangays.map(item => {
+      items.push(<Option value={item.barangay_psgc} key={item.barangay_psgc}>{item.barangay_name}</Option>);
+    })
+    return items;
+  }
+
 
   return (
     <div>
@@ -361,6 +465,15 @@ const HheadTable = (props) => {
           <Select allowClear placeholder="Users" onChange={(e) => selectUser(e)} style={{ width: '270px' }} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
             { populateUsers() }
           </Select>
+          <Select allowClear placeholder="Probinsya" style={{ width: '150px' }} onChange={(e) => getCities(e)} disabled={city != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+            { populateProvinces() }
+          </Select>
+          <Select allowClear placeholder="Lungsod/Bayan" style={{ width: '150px' }} onChange={(e) => getBarangays(e)}  disabled={barangay != ""} showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
+              { populateCities() }
+            </Select>
+          <Select allowClear placeholder="Barangay" style={{ width: '150px' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {formSetBarangay(e)}  }>
+              { populateBarangays() }
+            </Select>
           </>
         ) : "" }
         <Button type="primary" onClick={() => {getHouseholdHeads(1)}}>
