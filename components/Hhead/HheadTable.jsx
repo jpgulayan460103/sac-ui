@@ -365,6 +365,12 @@ const HheadTable = (props) => {
       user_id:e,
     });
   }
+  const setSapType = (e) => {
+    setSearchOptions({
+      ...searchOptions,
+      sap_type:e,
+    });
+  }
 
   const dataSource = hheads;
   
@@ -457,6 +463,11 @@ const HheadTable = (props) => {
         <span>Search:</span>
         <Input placeholder="Search" onBlur={(e) => {queryString(e)}} style={{width: "150px"}} />
         <RangePicker onChange={(e) => {datePickerChange(e)}} />
+        <Select allowClear placeholder="Sap Type" style={{ width: '150px' }} onChange={(e) => setSapType(e)} >
+            <Option value="">All</Option>
+            <Option value="REGULAR">Regular SAP</Option>
+            <Option value="LEFTOUT">Leftout SAP</Option>
+          </Select>
         { props.user.role == "admin" ? (
           <>
           <br />
@@ -472,8 +483,8 @@ const HheadTable = (props) => {
               { populateCities() }
             </Select>
           <Select allowClear placeholder="Barangay" style={{ width: '150px' }}  showSearch optionFilterProp="children" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} onChange={(e) => {formSetBarangay(e)}  }>
-              { populateBarangays() }
-            </Select>
+            { populateBarangays() }
+          </Select>
           </>
         ) : "" }
         <Button type="primary" onClick={() => {getHouseholdHeads(1)}}>
