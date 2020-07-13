@@ -19,6 +19,8 @@ const Encoded = (props) => {
   const [summary, setSummary] = useState([]);
   const [summaryType, setSummaryType] = useState("province");
   const [totalRecord, setTotalRecord] = useState(0);
+  const [totalRegularRecord, setTotalRegularRecord] = useState(0);
+  const [totalLeftoutRecord, setTotalLeftoutRecord] = useState(0);
   const getEncodedSummary = (type = 'province') => {
     API.Report.encoded(type)
     .then(res => {
@@ -32,6 +34,14 @@ const Encoded = (props) => {
         return accumulator + parseInt(currentValue.total_encoded);
       }, 0);
       setTotalRecord(total);
+      total = response.reduce((accumulator, currentValue) => {
+        return accumulator + parseInt(currentValue.total_regular);
+      }, 0);
+      setTotalRegularRecord(total);
+      total = response.reduce((accumulator, currentValue) => {
+        return accumulator + parseInt(currentValue.total_leftout);
+      }, 0);
+      setTotalLeftoutRecord(total);
     })
     .then(err => {})
     .then(res => {})
@@ -55,7 +65,17 @@ const Encoded = (props) => {
       key: 'barangay_name',
     },
     {
-      title: 'Total Encoded',
+      title: `Total Regular (${totalRegularRecord})`,
+      dataIndex: 'total_regular',
+      key: 'total_regular',
+    },
+    {
+      title: `Total Leftout (${totalLeftoutRecord})`,
+      dataIndex: 'total_leftout',
+      key: 'total_leftout',
+    },
+    {
+      title: `Total Encoded (${totalRecord})`,
       dataIndex: 'total_encoded',
       key: 'total_encoded',
     },
@@ -77,7 +97,7 @@ const Encoded = (props) => {
       </Radio.Group>
       <br />
       <br />
-      <Table dataSource={dataSource} columns={columns} footer={() => `Total Encoded : ${totalRecord}`} />
+      <Table dataSource={dataSource} columns={columns} footer={() => `` } />
     </div>
   );
 }
