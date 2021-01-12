@@ -467,6 +467,7 @@ const HheadTable = (props) => {
             <Option value="">All</Option>
             <Option value="REGULAR">Regular SAP</Option>
             <Option value="LEFTOUT">Leftout SAP</Option>
+            <Option value="BAYANIHAN 2">Bayanihan 2</Option>
           </Select>
         { props.user.role == "admin" ? (
           <>

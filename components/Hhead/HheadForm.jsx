@@ -1316,6 +1316,7 @@ const HheadForm = (props) => {
               <option value="">Select Type</option>
               <option value="REGULAR">Regular SAP</option>
               <option value="LEFTOUT">Leftout SAP</option>
+              <option value="BAYANIHAN 2">Bayanihan 2</option>
             </select>
           </Form.Item>
           <Form.Item style={{ width: '20%' }}>
