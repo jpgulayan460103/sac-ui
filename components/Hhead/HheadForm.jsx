@@ -656,6 +656,7 @@ const HheadForm = (props) => {
         bene_4ps:false,
         katutubo:false,
         bene_others:false,
+        sap_type: "BAYANIHAN 2",
       }
     }
     newForm.members = [];

@@ -7,7 +7,8 @@ const initialState = () => {
       bene_4ps: false,
       katutubo: false,
       bene_others: false,
-      members: []
+      members: [],
+      sap_type: "BAYANIHAN 2",
     },
     formError: {},
     formType: "create",
